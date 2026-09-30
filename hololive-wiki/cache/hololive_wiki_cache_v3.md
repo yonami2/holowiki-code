@@ -144,6 +144,9 @@ python3 scripts/hololive_cache.py --status
     - アーカイブ内199件は、Linux の Python 3.9〜3.13 で各192件が成功し、7件がスキップされた（v1を与えると193件成功・6件スキップ）。
     - `restore-v1` の出力は元のv1と一致した。
     - スキルのテスト37件は、Linux の Python 3.9・3.11で成功した。
+    - GitHub Actions（[hololive-wiki skill](https://github.com/yonami2/holowiki-code/actions/runs/36735418567)、コミット `8f868e2`）：Windows・Linux の Python 3.9 と 3.13、Linux の 3.10〜3.12、macOS の 3.13 の8ジョブがすべて成功した（スキルのテスト、展開したアーカイブのテスト。Windows では `selftest.cmd` と、空白を含むパス・終了コード・出力の順序も確認）。
+    - GitHub Actions（[Windowsの起動ファイルの確認](https://github.com/yonami2/holowiki-code/actions/runs/36735460734)）：Python 3.9・3.13 の2ジョブが成功した。`py -3` がそれぞれの版を選ぶことを確かめたうえで、ラッパーの `ARCHIVE_SHA256` と照合したアーカイブを展開し、起動ファイルがビルダーの生成と同じであること、起動ファイルのテスト6件、`selftest.cmd`（目録の4,585件の照合と、テスト199件。スキップはv1を与えるテストの1件だけ）を確かめた。
+    - その後、ワークフローのアクションを Node.js 24 版（`actions/checkout@v5`・`actions/setup-python@v6`）に上げた。Node.js 20 版（`@v4`・`@v5`）には、GitHub が廃止予定の警告を出していた。本案内と `references/reader.md` の結果記録は、CI の完了後に追記した。実行コード・テスト・アーカイブは、CI で成功したものと同じである。
 - **前の版（2026-09-30、ビルダー3.3.0／資料パック1.4.2）**：利用者の依頼で、コードとキャッシュの全体に誤りがないかを点検した。手順と根拠（点検用スクリプトと集計）はアーカイブ内の `audits/skill_update_2026-09-30/`。記事本文・索引・資料パック・名前の索引・v1復元用データは変えていない。
   - 点検の範囲：
     - 静的解析（ruff・mypy、Python 35ファイル）

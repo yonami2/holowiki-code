@@ -18,8 +18,8 @@ jobs:
       # The distributed .cmd files invoke "py -3" when the launcher exists.
       PY_PYTHON3: ${{ matrix.python }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python }}
       - name: Verify and unpack the archive the skill ships
