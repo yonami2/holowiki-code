@@ -71,7 +71,8 @@ def main() -> int:
     except (OSError, ValueError) as exc:
         print("Cache initialization failed: " + str(exc), file=sys.stderr)
         return 1
-    print(card.decode("utf-8"))
+    text = card.decode("utf-8")
+    sys.stdout.write(text if text.endswith("\n") else text + "\n")        # as `show` prints it, no blank line added
     return 0
 
 

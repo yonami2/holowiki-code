@@ -160,7 +160,21 @@ class WrapperTests(unittest.TestCase):
         self.assertEqual(code, 0, err)
         self.assertTrue(out.startswith("白上フブキ | JP"))
 
-    def test_story_status_and_help(self):
+    def test_help_for_the_wrapper_and_each_command(self):
+        code, out, err = run([WRAPPER, "--help"], self.cache_dir)
+        self.assertEqual((code, err), (0, ""))
+        self.assertTrue(out.startswith("usage: hololive_cache.py COMMAND"), out)
+        # A command's help is argparse's: printed through the held output, then exit code 0.
+        for argv, expected in ((["show", "--help"], "usage: hololive_cache.py show"), (["story", "-h"], "--topic")):
+            with self.subTest(argv=argv):
+                code, out, err = run([WRAPPER, *argv], self.cache_dir)
+                self.assertEqual((code, err), (0, ""))
+                self.assertIn(expected, out)
+        code, out, err = run([WRAPPER, "nosuch"], self.cache_dir)
+        self.assertEqual((code, out), (2, ""))
+        self.assertIn("usage: hololive_cache.py", err)
+
+    def test_story_and_status(self):
         code, out, err = run([WRAPPER, "story", "宝鐘マリン", "兎田ぺこら", "--topic", "料理"], self.cache_dir)
         self.assertEqual(code, 0, err)
         self.assertTrue(out.startswith("# 物語用資料パック: 宝鐘マリン × 兎田ぺこら"))
@@ -207,6 +221,7 @@ class WrapperTests(unittest.TestCase):
         code, out, err = run([LOOKUP, "さくらみこ"], self.cache_dir, {"PYTHONIOENCODING": "cp932"})
         self.assertEqual(code, 0, err)
         self.assertIn("🌸", out)
+        self.assertFalse(out.replace("\r\n", "\n").endswith("\n\n"))      # the card as stored, no blank line added
 
     def test_lookup_list_ends_quietly_when_its_reader_stops(self):
         # `--list | head -1`: the pipe is closed before the list is written. As for the cache CLI and the
@@ -345,6 +360,8 @@ class RepairTests(unittest.TestCase):
         private_file(receipt, json.dumps(record))
         self.assertFalse(wrapper._complete(root))        # MANIFEST_SHA256 comes with the skill
         code, out, err = run([WRAPPER, "read", "宝鐘マリン", "main", "--find", "改変マリン"], cache_dir)
+        self.assertEqual(code, 0, err)
+        self.assertIn("matches: 0", out)                 # read from the copy unpacked again
         self.assertEqual(page.read_bytes(), data)
 
     def test_bytecode_in_the_cache_is_never_run(self):
