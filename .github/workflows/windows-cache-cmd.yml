@@ -22,34 +22,51 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python }}
-      - name: Verify and unpack the exact archived test files
-        shell: pwsh
+      - name: Verify and unpack the archive the skill ships
+        shell: python
         run: |
-          $expected = 'e21a7c42ffb1d2fcc0a5e22d65c6f6b4671565bc1428e756f097287a57353db2'
-          $actual = (Get-FileHash ci/windows_cmd_fixture.tar.gz -Algorithm SHA256).Hash.ToLowerInvariant()
-          if ($actual -ne $expected) { throw "Archive checksum mismatch: $actual" }
-          tar -xzf ci/windows_cmd_fixture.tar.gz
+          # The archive whose SHA-256 the skill's wrapper names, so the launchers and code tested below are
+          # exactly the distributed ones.
+          import hashlib, os, re, tarfile
+          archive = os.path.join("hololive-wiki", "cache", "hololive_wiki_person_cache.tar.xz")
+          with open(os.path.join("hololive-wiki", "scripts", "hololive_cache.py"), encoding="utf-8") as stream:
+              expected = re.search(r'^ARCHIVE_SHA256 = "([0-9a-f]{64})"$', stream.read(), re.M).group(1)
+          with open(archive, "rb") as stream:
+              actual = hashlib.sha256(stream.read()).hexdigest()
+          if actual != expected:
+              raise SystemExit(f"Archive checksum mismatch: {actual}, the wrapper names {expected}")
+          with tarfile.open(archive, "r:xz") as tar:
+              tar.extractall(os.environ["RUNNER_TEMP"], **({"filter": "data"} if hasattr(tarfile, "data_filter") else {}))
       - name: Confirm the command launcher selects the matrix Python
         shell: pwsh
         run: |
           $actual = py -3 -c "import sys; print(str(sys.version_info.major) + '.' + str(sys.version_info.minor))"
           if ($actual -ne '${{ matrix.python }}') { throw "py -3 selected $actual; expected ${{ matrix.python }}" }
-      - name: Execute distributed CMD launchers through cmd.exe
-        shell: pwsh
-        working-directory: hololive_wiki_person_cache
+      - name: The shipped launchers are the builder's
+        shell: python
+        working-directory: ${{ runner.temp }}/hololive_wiki_person_cache
         run: |
-          python -c "import unittest; s=unittest.defaultTestLoader.discover('tests',pattern='test_windows_launchers.py'); r=unittest.TextTestRunner(verbosity=2).run(s); assert r.wasSuccessful() and r.testsRun == 5 and len(r.skipped) == 0, 'Windows launcher tests failed or were skipped'"
-      - name: Run the shipped selftest.cmd and verify launcher bytes
-        shell: pwsh
-        working-directory: hololive_wiki_person_cache
+          import sys
+          from pathlib import Path
+          sys.dont_write_bytecode = True
+          sys.path.insert(0, ".")
+          import build_fast_cache
+          differ = [name for name, script in build_fast_cache.WINDOWS_LAUNCHERS.items()
+                    if Path(name).read_bytes() != script.replace("\n", "\r\n").encode("ascii")]
+          if differ:
+              raise SystemExit(f"Shipped launchers differ from the builder's: {differ}")
+          print("launchers:", ", ".join(sorted(build_fast_cache.WINDOWS_LAUNCHERS)))
+      - name: Execute the shipped CMD launchers through cmd.exe
+        shell: python
+        working-directory: ${{ runner.temp }}/hololive_wiki_person_cache
         run: |
-          python -c "import os,sys; from pathlib import Path; sys.path.insert(0,'tests'); import test_person_cache as h; p=Path(os.environ['RUNNER_TEMP'])/'cache-cmd-selftest'; h.write_v1(p/'in'); h.write_snapshots(p/'snapshots'); h.builder.build(p/'in',p/'out'/'hololive_wiki_person_cache',wiki_root_json=h.wiki_root(p/'root.json'),snapshots_dir=p/'snapshots')"
-          if ($LASTEXITCODE -ne 0) { throw 'Failed to build synthetic cache' }
-          $built = Join-Path $env:RUNNER_TEMP 'cache-cmd-selftest/out/hololive_wiki_person_cache'
-          foreach ($file in @('hololive_cache.cmd', 'selftest.cmd', 'tools/hololive_wiki_reader.cmd')) {
-            $shipped = (Get-FileHash $file -Algorithm SHA256).Hash
-            $generated = (Get-FileHash (Join-Path $built $file) -Algorithm SHA256).Hash
-            if ($shipped -ne $generated) { throw "Generated launcher differs from shipped $file" }
-          }
-          & (Join-Path $built 'selftest.cmd')
-          if ($LASTEXITCODE -ne 0) { throw "selftest.cmd returned $LASTEXITCODE" }
+          import sys, unittest
+          sys.dont_write_bytecode = True
+          suite = unittest.defaultTestLoader.discover("tests", pattern="test_windows_launchers.py")
+          result = unittest.TextTestRunner(verbosity=2).run(suite)
+          if not result.wasSuccessful() or result.skipped or result.testsRun < 6:
+              raise SystemExit("Windows launcher tests failed, were skipped or did not run")
+      - name: Run the shipped selftest.cmd (verify, then every offline test)
+        shell: cmd
+        working-directory: ${{ runner.temp }}/hololive_wiki_person_cache
+        run: call selftest.cmd

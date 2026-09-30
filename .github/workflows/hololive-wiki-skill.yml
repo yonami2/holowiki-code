@@ -57,7 +57,7 @@ jobs:
           import os, subprocess, sys, tarfile
           target = os.path.join(os.environ["RUNNER_TEMP"], "arc")
           with tarfile.open(os.path.join("cache", "hololive_wiki_person_cache.tar.xz"), "r:xz") as archive:
-              archive.extractall(target)
+              archive.extractall(target, **({"filter": "data"} if hasattr(tarfile, "data_filter") else {}))
           root = os.path.join(target, "hololive_wiki_person_cache")
           subprocess.run([sys.executable, "hololive_cache.py", "verify"], cwd=root, check=True)
           sys.exit(subprocess.run([sys.executable, "-m", "unittest", "discover", "-s", "tests", "-v"], cwd=root).returncode)

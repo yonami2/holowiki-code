@@ -34,7 +34,7 @@ MAX_BYTES = 24 * 1024 * 1024
 MAX_GRID_CELLS = 1_000_000
 MAX_PAGE_GRID_CELLS = 4_000_000
 MAX_PAGE_GRID_WORK = 4_000_000
-VERSION = "3.9.0+skill.3"
+VERSION = "3.9.0+skill.4"
 DEFAULT_UA = "HololiveWikiReader/3.9.0 (Python urllib; public single-page reader)"
 DESKTOP_UA = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/130.0.0.0 Safari/537.36 HololiveWikiReader/3.2"
 REDIRECT_CODES = {301, 302, 303, 307, 308}
@@ -2442,7 +2442,6 @@ def rebuild_title_index(cache, index):
     return report
 
 
-
 def resolve_source(args, index):
     wiki = getattr(args, "wiki", "hololivetv")
     if index.wiki != wiki:
@@ -2543,7 +2542,7 @@ def build_cli():
     cli.add_argument("--surrogate-charrefs", choices=("html", "utf16"), default="html", help="HTML semantics by default; utf16 explicitly recovers adjacent surrogate references in text/title/alt with source evidence")
     cli.add_argument("--ad-filter", choices=AD_FILTER_MODES, default="strict",
                      help="strict (default): skip ad slots/page chrome and refuse a page whose extracted content still "
-                          "point at an ad network; report: skip and warn only; off: v3.8.3 behaviour")
+                          "points at an ad network; report: skip and warn only; off: v3.8.3 behaviour")
     cli.add_argument("--user-agent", default=DEFAULT_UA, help="Request User-Agent; HTTP 403 never triggers a UA-switch retry")
     cli.add_argument("--cache-dir", type=Path, help="Enable validated disk caching in an explicit task directory (disabled by default)")
     cli.add_argument("--cache-policy", choices=("clean", "diagnostic"), default="clean", help="clean: reject character replacements/preprocessing (default); diagnostic: reuse raw snapshots with fresh warnings, never incomplete responses")
@@ -3002,13 +3001,11 @@ def run_cli():
         finally:
             sys.stdout.flush()
     except BrokenPipeError:
-        import os
         # A second implicit flush at interpreter shutdown must not print a
         # traceback or replace the intended status with CPython's exit 120.
         with open(os.devnull, "w") as sink:
             os.dup2(sink.fileno(), sys.stdout.fileno())
         return 0
-
 
 
 if __name__ == "__main__":
