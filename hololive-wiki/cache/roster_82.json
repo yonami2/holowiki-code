@@ -1,0 +1,1258 @@
+{
+ "schema": "hololive-wiki-roster/3",
+ "count": 82,
+ "inside_archive": "hololive_wiki_person_cache/",
+ "fictional_world_note": {
+  "setting": "卒業生はいない",
+  "origin": "このキャッシュを作成した会話で利用者が指定した創作設定。wikiの記載ではない。",
+  "applies_only_when": "今回の会話で利用者がこの設定を採用している場合",
+  "not_for": "wikiの事実・現実の所属や活動状態の質問、別の会話の創作"
+ },
+ "wiki_status_note": "wiki（非公式）のトップページの掲載区分。公式サイトとは照合していない。物語では会話で指定された前提（例: 卒業生なしの世界）を優先する。",
+ "loader": "hololive_cache.py",
+ "people": [
+  {
+   "name": "Fuwawa Abyssgard",
+   "slug": "fuwawa_abyssgard",
+   "region": "EN",
+   "generation": "advent",
+   "card_path": "people/fuwawa_abyssgard/card.md",
+   "collection_status": "raw_cached",
+   "readings": [
+    "フワワ・アビスガード"
+   ],
+   "handles": [
+    "@fuwamoco_en"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "Koseki Bijou",
+   "slug": "koseki_bijou",
+   "region": "EN",
+   "generation": "advent",
+   "card_path": "people/koseki_bijou/card.md",
+   "collection_status": "raw_cached",
+   "readings": [
+    "古石ビジュー"
+   ],
+   "handles": [
+    "@kosekibijou"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "Mococo Abyssgard",
+   "slug": "mococo_abyssgard",
+   "region": "EN",
+   "generation": "advent",
+   "card_path": "people/mococo_abyssgard/card.md",
+   "collection_status": "raw_cached",
+   "readings": [
+    "モココ・アビスガード"
+   ],
+   "handles": [
+    "@fuwamoco_en"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "Nerissa Ravencroft",
+   "slug": "nerissa_ravencroft",
+   "region": "EN",
+   "generation": "advent",
+   "card_path": "people/nerissa_ravencroft/card.md",
+   "collection_status": "raw_cached",
+   "readings": [
+    "ネリッサ・レイヴンクロフト"
+   ],
+   "handles": [
+    "@nerissa_en"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "Shiori Novella",
+   "slug": "shiori_novella",
+   "region": "EN",
+   "generation": "advent",
+   "card_path": "people/shiori_novella/card.md",
+   "collection_status": "raw_cached",
+   "readings": [
+    "シオリ・ノヴェラ"
+   ],
+   "handles": [
+    "@shiorinovella"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "Ceres Fauna",
+   "slug": "ceres_fauna",
+   "region": "EN",
+   "generation": "council",
+   "card_path": "people/ceres_fauna/card.md",
+   "collection_status": "raw_cached",
+   "readings": [
+    "セレス・ファウナ"
+   ],
+   "handles": [
+    "@ceresfauna"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 「卒業生」欄に掲載（元EN -Promise-）"
+  },
+  {
+   "name": "Hakos Baelz",
+   "slug": "hakos_baelz",
+   "region": "EN",
+   "generation": "council",
+   "card_path": "people/hakos_baelz/card.md",
+   "collection_status": "raw_cached",
+   "readings": [
+    "ハコス・ベールズ"
+   ],
+   "handles": [
+    "@hakosbaelz",
+    "@iamhakosbaelz"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "Nanashi Mumei",
+   "slug": "nanashi_mumei",
+   "region": "EN",
+   "generation": "council",
+   "card_path": "people/nanashi_mumei/card.md",
+   "collection_status": "raw_cached",
+   "readings": [
+    "七詩ムメイ"
+   ],
+   "handles": [
+    "@nanashimumei_en"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 「卒業生」欄に掲載（元EN -Promise-）"
+  },
+  {
+   "name": "Ouro Kronii",
+   "slug": "ouro_kronii",
+   "region": "EN",
+   "generation": "council",
+   "card_path": "people/ouro_kronii/card.md",
+   "collection_status": "raw_cached",
+   "readings": [
+    "オーロ・クロニー"
+   ],
+   "handles": [
+    "@ourokronii"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "Tsukumo Sana",
+   "slug": "tsukumo_sana",
+   "region": "EN",
+   "generation": "council",
+   "card_path": "people/tsukumo_sana/card.md",
+   "collection_status": "raw_cached",
+   "readings": [
+    "九十九佐命"
+   ],
+   "handles": [
+    "@tsukumosana"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 「卒業生」欄に掲載（元EN -Council-）"
+  },
+  {
+   "name": "IRyS",
+   "slug": "irys",
+   "region": "EN",
+   "generation": "hope",
+   "card_path": "people/irys/card.md",
+   "collection_status": "raw_cached",
+   "readings": [
+    "アイリス"
+   ],
+   "handles": [
+    "@irys_en"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "Cecilia Immergreen",
+   "slug": "cecilia_immergreen",
+   "region": "EN",
+   "generation": "justice",
+   "card_path": "people/cecilia_immergreen/card.md",
+   "collection_status": "raw_cached",
+   "readings": [
+    "セシリア・イマーグリーン"
+   ],
+   "handles": [
+    "@ceciliaimgreen"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "Elizabeth Rose Bloodflame",
+   "slug": "elizabeth_rose_bloodflame",
+   "region": "EN",
+   "generation": "justice",
+   "card_path": "people/elizabeth_rose_bloodflame/card.md",
+   "collection_status": "raw_cached",
+   "readings": [
+    "エリザベス・ローズ・ブラッドフレイム"
+   ],
+   "handles": [
+    "@ERBloodflame"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "Gigi Murin",
+   "slug": "gigi_murin",
+   "region": "EN",
+   "generation": "justice",
+   "card_path": "people/gigi_murin/card.md",
+   "collection_status": "raw_cached",
+   "readings": [
+    "ジジ・ムリン"
+   ],
+   "handles": [
+    "@gigimurin"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "Raora Panthera",
+   "slug": "raora_panthera",
+   "region": "EN",
+   "generation": "justice",
+   "card_path": "people/raora_panthera/card.md",
+   "collection_status": "raw_cached",
+   "readings": [
+    "ラオーラ・パンテーラ"
+   ],
+   "handles": [
+    "@raorapanthera"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "Gawr Gura",
+   "slug": "gawr_gura",
+   "region": "EN",
+   "generation": "myth",
+   "card_path": "people/gawr_gura/card.md",
+   "collection_status": "raw_cached",
+   "readings": [
+    "がうる・ぐら"
+   ],
+   "handles": [
+    "@gawrgura"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 「卒業生」欄に掲載（元EN -Myth-）"
+  },
+  {
+   "name": "Mori Calliope",
+   "slug": "mori_calliope",
+   "region": "EN",
+   "generation": "myth",
+   "card_path": "people/mori_calliope/card.md",
+   "collection_status": "raw_cached",
+   "readings": [
+    "森カリオペ"
+   ],
+   "handles": [
+    "@moricalliope",
+    "@moricalliope_jp",
+    "@calliope_info"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "Ninomae Ina'nis",
+   "slug": "ninomae_inanis",
+   "region": "EN",
+   "generation": "myth",
+   "card_path": "people/ninomae_inanis/card.md",
+   "collection_status": "raw_cached",
+   "readings": [
+    "一伊那尓栖"
+   ],
+   "handles": [
+    "@ninomaeinanis"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "Takanashi Kiara",
+   "slug": "takanashi_kiara",
+   "region": "EN",
+   "generation": "myth",
+   "card_path": "people/takanashi_kiara/card.md",
+   "collection_status": "raw_cached",
+   "readings": [
+    "小鳥遊キアラ"
+   ],
+   "handles": [
+    "@takanashikiara"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "Watson Amelia",
+   "slug": "watson_amelia",
+   "region": "EN",
+   "generation": "myth",
+   "card_path": "people/watson_amelia/card.md",
+   "collection_status": "raw_cached",
+   "readings": [
+    "ワトソン・アメリア"
+   ],
+   "handles": [
+    "@watsonameliaEN"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載（【配信活動終了】の注記あり）"
+  },
+  {
+   "name": "Airani Iofifteen",
+   "slug": "airani_iofifteen",
+   "region": "ID",
+   "generation": "id1",
+   "card_path": "people/airani_iofifteen/card.md",
+   "collection_status": "raw_cached",
+   "readings": [
+    "アイラニ・イオフィフティーン"
+   ],
+   "handles": [
+    "@airaniiofifteen"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "Ayunda Risu",
+   "slug": "ayunda_risu",
+   "region": "ID",
+   "generation": "id1",
+   "card_path": "people/ayunda_risu/card.md",
+   "collection_status": "raw_cached",
+   "readings": [
+    "アユンダ・リス"
+   ],
+   "handles": [
+    "@ayunda_risu"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "Moona Hoshinova",
+   "slug": "moona_hoshinova",
+   "region": "ID",
+   "generation": "id1",
+   "card_path": "people/moona_hoshinova/card.md",
+   "collection_status": "raw_cached",
+   "readings": [
+    "ムーナ・ホシノヴァ"
+   ],
+   "handles": [
+    "@moonahoshinova"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "Anya Melfissa",
+   "slug": "anya_melfissa",
+   "region": "ID",
+   "generation": "id2",
+   "card_path": "people/anya_melfissa/card.md",
+   "collection_status": "raw_cached",
+   "readings": [
+    "アーニャ・メルフィッサ"
+   ],
+   "handles": [
+    "@anyamelfissa"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "Kureiji Ollie",
+   "slug": "kureiji_ollie",
+   "region": "ID",
+   "generation": "id2",
+   "card_path": "people/kureiji_ollie/card.md",
+   "collection_status": "raw_cached",
+   "readings": [
+    "クレイジー・オリー"
+   ],
+   "handles": [
+    "@kureijiollie"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "Pavolia Reine",
+   "slug": "pavolia_reine",
+   "region": "ID",
+   "generation": "id2",
+   "card_path": "people/pavolia_reine/card.md",
+   "collection_status": "raw_cached",
+   "readings": [
+    "パヴォリア・レイネ"
+   ],
+   "handles": [
+    "@pavoliareine"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "Kaela Kovalskia",
+   "slug": "kaela_kovalskia",
+   "region": "ID",
+   "generation": "id3",
+   "card_path": "people/kaela_kovalskia/card.md",
+   "collection_status": "raw_cached",
+   "readings": [
+    "カエラ・コヴァルスキア"
+   ],
+   "handles": [
+    "@kaelakovalskia"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "Kobo Kanaeru",
+   "slug": "kobo_kanaeru",
+   "region": "ID",
+   "generation": "id3",
+   "card_path": "people/kobo_kanaeru/card.md",
+   "collection_status": "raw_cached",
+   "readings": [
+    "こぼ・かなえる"
+   ],
+   "handles": [
+    "@kobokanaeru"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "Vestia Zeta",
+   "slug": "vestia_zeta",
+   "region": "ID",
+   "generation": "id3",
+   "card_path": "people/vestia_zeta/card.md",
+   "collection_status": "raw_cached",
+   "readings": [
+    "ベスティア・ゼータ"
+   ],
+   "handles": [
+    "@vestiazeta"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "AZKi",
+   "slug": "azki",
+   "region": "JP",
+   "generation": "0期生",
+   "card_path": "people/azki/card.md",
+   "collection_status": "structured_cached",
+   "readings": [
+    "あずき"
+   ],
+   "handles": [
+    "@AZKi_VDiVA"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "さくらみこ",
+   "slug": "sakura_miko",
+   "region": "JP",
+   "generation": "0期生",
+   "card_path": "people/sakura_miko/card.md",
+   "collection_status": "structured_cached",
+   "readings": [],
+   "handles": [
+    "@sakuramiko35",
+    "@mikochisub"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "ときのそら",
+   "slug": "tokino_sora",
+   "region": "JP",
+   "generation": "0期生",
+   "card_path": "people/tokino_sora/card.md",
+   "collection_status": "structured_cached",
+   "readings": [],
+   "handles": [
+    "@tokino_sora"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "ロボ子さん",
+   "slug": "robocosan",
+   "region": "JP",
+   "generation": "0期生",
+   "card_path": "people/robocosan/card.md",
+   "collection_status": "structured_cached",
+   "readings": [
+    "ろぼこさん"
+   ],
+   "handles": [
+    "@robocosan",
+    "@maybe_robochan"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "星街すいせい",
+   "slug": "hoshimachi_suisei",
+   "region": "JP",
+   "generation": "0期生",
+   "card_path": "people/hoshimachi_suisei/card.md",
+   "collection_status": "structured_cached",
+   "readings": [
+    "ほしまちすいせい"
+   ],
+   "handles": [
+    "@suisei_hosimati",
+    "@suisei_submati"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "アキ・ローゼンタール",
+   "slug": "aki_rosenthal",
+   "region": "JP",
+   "generation": "1期生",
+   "card_path": "people/aki_rosenthal/card.md",
+   "collection_status": "structured_cached",
+   "readings": [],
+   "handles": [
+    "@akirosenthal",
+    "@akirose_sub"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "人見クリス",
+   "slug": "hitomi_chris",
+   "region": "JP",
+   "generation": "1期生",
+   "card_path": "people/hitomi_chris/card.md",
+   "collection_status": "unpublished_person_article",
+   "readings": [],
+   "handles": [],
+   "wiki_status": "wikiトップ（2026-09-27取得）: メンバー一覧に未掲載"
+  },
+  {
+   "name": "夏色まつり",
+   "slug": "natsuiro_matsuri",
+   "region": "JP",
+   "generation": "1期生",
+   "card_path": "people/natsuiro_matsuri/card.md",
+   "collection_status": "structured_cached",
+   "readings": [
+    "なついろまつり"
+   ],
+   "handles": [
+    "@natsuiromatsuri",
+    "@7216_2nd"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "夜空メル",
+   "slug": "yozora_mel",
+   "region": "JP",
+   "generation": "1期生",
+   "card_path": "people/yozora_mel/card.md",
+   "collection_status": "structured_cached",
+   "readings": [
+    "よぞらめる"
+   ],
+   "handles": [
+    "@yozoramel",
+    "@mel_kapu"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 「活動終了／卒業生メンバー」欄に掲載（元1期生）"
+  },
+  {
+   "name": "白上フブキ",
+   "slug": "shirakami_fubuki",
+   "region": "JP",
+   "generation": "1期生",
+   "card_path": "people/shirakami_fubuki/card.md",
+   "collection_status": "structured_cached",
+   "readings": [
+    "しらかみふぶき"
+   ],
+   "handles": [
+    "@shirakamifubuki",
+    "@fubuchandayo"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "赤井はあと",
+   "slug": "akai_haato",
+   "region": "JP",
+   "generation": "1期生",
+   "card_path": "people/akai_haato/card.md",
+   "collection_status": "structured_cached",
+   "readings": [
+    "あかいはあと"
+   ],
+   "handles": [
+    "@akaihaato",
+    "@HAACHAMAsub",
+    "@akaihaatosub"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "大空スバル",
+   "slug": "oozora_subaru",
+   "region": "JP",
+   "generation": "2期生",
+   "card_path": "people/oozora_subaru/card.md",
+   "collection_status": "structured_cached",
+   "readings": [
+    "おおぞらすばる"
+   ],
+   "handles": [
+    "@oozorasubaru"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "湊あくあ",
+   "slug": "minato_aqua",
+   "region": "JP",
+   "generation": "2期生",
+   "card_path": "people/minato_aqua/card.md",
+   "collection_status": "structured_cached",
+   "readings": [
+    "みなとあくあ"
+   ],
+   "handles": [
+    "@minatoaqua"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 「卒業生」欄に掲載（元2期生）"
+  },
+  {
+   "name": "癒月ちょこ",
+   "slug": "yuzuki_choco",
+   "region": "JP",
+   "generation": "2期生",
+   "card_path": "people/yuzuki_choco/card.md",
+   "collection_status": "structured_cached",
+   "readings": [
+    "ゆづきちょこ"
+   ],
+   "handles": [
+    "@yuzukichococh"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "百鬼あやめ",
+   "slug": "nakiri_ayame",
+   "region": "JP",
+   "generation": "2期生",
+   "card_path": "people/nakiri_ayame/card.md",
+   "collection_status": "structured_cached",
+   "readings": [
+    "なきりあやめ"
+   ],
+   "handles": [
+    "@nakiriayame",
+    "@YODAYOsub"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "紫咲シオン",
+   "slug": "murasaki_shion",
+   "region": "JP",
+   "generation": "2期生",
+   "card_path": "people/murasaki_shion/card.md",
+   "collection_status": "structured_cached",
+   "readings": [
+    "むらさきしおん"
+   ],
+   "handles": [
+    "@murasakishionch",
+    "@shionchan_o"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 「卒業生」欄に掲載（元2期生）"
+  },
+  {
+   "name": "不知火フレア",
+   "slug": "shiranui_flare",
+   "region": "JP",
+   "generation": "3期生",
+   "card_path": "people/shiranui_flare/card.md",
+   "collection_status": "structured_cached",
+   "readings": [
+    "しらぬいふれあ"
+   ],
+   "handles": [
+    "@shiranuiflare",
+    "@fuu_tan_sub"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "兎田ぺこら",
+   "slug": "usada_pekora",
+   "region": "JP",
+   "generation": "3期生",
+   "card_path": "people/usada_pekora/card.md",
+   "collection_status": "structured_cached",
+   "readings": [
+    "うさだぺこら"
+   ],
+   "handles": [
+    "@usadapekora",
+    "@uraakapeko"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "宝鐘マリン",
+   "slug": "houshou_marine",
+   "region": "JP",
+   "generation": "3期生",
+   "card_path": "people/houshou_marine/card.md",
+   "collection_status": "structured_cached",
+   "readings": [],
+   "handles": [
+    "@houshoumarine"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "潤羽るしあ",
+   "slug": "uruha_rushia",
+   "region": "JP",
+   "generation": "3期生",
+   "card_path": "people/uruha_rushia/card.md",
+   "collection_status": "raw_cached",
+   "readings": [
+    "うるはるしあ"
+   ],
+   "handles": [
+    "@uruharushia"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 「活動終了／卒業生メンバー」欄に掲載（元3期生）"
+  },
+  {
+   "name": "白銀ノエル",
+   "slug": "shirogane_noel",
+   "region": "JP",
+   "generation": "3期生",
+   "card_path": "people/shirogane_noel/card.md",
+   "collection_status": "structured_cached",
+   "readings": [
+    "しろがねのえる"
+   ],
+   "handles": [
+    "@shiroganenoel",
+    "@danchou_sub"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "天音かなた",
+   "slug": "amane_kanata",
+   "region": "JP",
+   "generation": "4期生",
+   "card_path": "people/amane_kanata/card.md",
+   "collection_status": "structured_cached",
+   "readings": [
+    "あまねかなた"
+   ],
+   "handles": [
+    "@amanekanatach",
+    "@subtasochan"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 「卒業生」欄に掲載（元4期生）"
+  },
+  {
+   "name": "姫森ルーナ",
+   "slug": "himemori_luna",
+   "region": "JP",
+   "generation": "4期生",
+   "card_path": "people/himemori_luna/card.md",
+   "collection_status": "structured_cached",
+   "readings": [
+    "ひめもりるーな"
+   ],
+   "handles": [
+    "@himemoriluna",
+    "@lunatan_nanora"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "常闇トワ",
+   "slug": "tokoyami_towa",
+   "region": "JP",
+   "generation": "4期生",
+   "card_path": "people/tokoyami_towa/card.md",
+   "collection_status": "structured_cached",
+   "readings": [
+    "とこやみとわ"
+   ],
+   "handles": [
+    "@tokoyamitowa",
+    "@108_towasama"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "桐生ココ",
+   "slug": "kiryu_coco",
+   "region": "JP",
+   "generation": "4期生",
+   "card_path": "people/kiryu_coco/card.md",
+   "collection_status": "raw_cached",
+   "readings": [
+    "きりゅうここ"
+   ],
+   "handles": [
+    "@kiryucoco"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 「卒業生」欄に掲載（元4期生）"
+  },
+  {
+   "name": "角巻わため",
+   "slug": "tsunomaki_watame",
+   "region": "JP",
+   "generation": "4期生",
+   "card_path": "people/tsunomaki_watame/card.md",
+   "collection_status": "structured_cached",
+   "readings": [
+    "つのまきわため"
+   ],
+   "handles": [
+    "@tsunomakiwatame"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "尾丸ポルカ",
+   "slug": "omaru_polka",
+   "region": "JP",
+   "generation": "5期生",
+   "card_path": "people/omaru_polka/card.md",
+   "collection_status": "structured_cached",
+   "readings": [
+    "おまるぽるか"
+   ],
+   "handles": [
+    "@omarupolka",
+    "@polkasub"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "桃鈴ねね",
+   "slug": "momosuzu_nene",
+   "region": "JP",
+   "generation": "5期生",
+   "card_path": "people/momosuzu_nene/card.md",
+   "collection_status": "structured_cached",
+   "readings": [
+    "ももすずねね"
+   ],
+   "handles": [
+    "@momosuzunene",
+    "@_nenechidayo"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "獅白ぼたん",
+   "slug": "shishiro_botan",
+   "region": "JP",
+   "generation": "5期生",
+   "card_path": "people/shishiro_botan/card.md",
+   "collection_status": "structured_cached",
+   "readings": [
+    "ししろぼたん"
+   ],
+   "handles": [
+    "@shishirobotan",
+    "@446_bo"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "雪花ラミィ",
+   "slug": "yukihana_lamy",
+   "region": "JP",
+   "generation": "5期生",
+   "card_path": "people/yukihana_lamy/card.md",
+   "collection_status": "structured_cached",
+   "readings": [
+    "ゆきはならみぃ"
+   ],
+   "handles": [
+    "@yukihanalamy",
+    "@YukihanaWamy"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "魔乃アロエ",
+   "slug": "mano_aloe",
+   "region": "JP",
+   "generation": "5期生",
+   "card_path": "people/mano_aloe/card.md",
+   "collection_status": "raw_cached",
+   "readings": [
+    "まのあろえ"
+   ],
+   "handles": [
+    "@manoaloe"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 「活動終了／卒業生メンバー」欄に掲載（元5期生）"
+  },
+  {
+   "name": "水宮枢",
+   "slug": "mizumiya_su",
+   "region": "JP",
+   "generation": "FLOW GLOW",
+   "card_path": "people/mizumiya_su/card.md",
+   "collection_status": "structured_cached",
+   "readings": [
+    "みずみや すう"
+   ],
+   "handles": [
+    "@mizumiya_su"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "綺々羅々ヴィヴィ",
+   "slug": "kikirara_vivi",
+   "region": "JP",
+   "generation": "FLOW GLOW",
+   "card_path": "people/kikirara_vivi/card.md",
+   "collection_status": "structured_cached",
+   "readings": [
+    "ききらら ゔぃゔぃ"
+   ],
+   "handles": [
+    "@kikiraravivi"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "虎金妃笑虎",
+   "slug": "koganei_niko",
+   "region": "JP",
+   "generation": "FLOW GLOW",
+   "card_path": "people/koganei_niko/card.md",
+   "collection_status": "structured_cached",
+   "readings": [
+    "こがねい にこ"
+   ],
+   "handles": [
+    "@koganeiniko"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "輪堂千速",
+   "slug": "rindo_chihaya",
+   "region": "JP",
+   "generation": "FLOW GLOW",
+   "card_path": "people/rindo_chihaya/card.md",
+   "collection_status": "structured_cached",
+   "readings": [
+    "りんどう ちはや"
+   ],
+   "handles": [
+    "@rindochihaya"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "響咲リオナ",
+   "slug": "isaki_riona",
+   "region": "JP",
+   "generation": "FLOW GLOW",
+   "card_path": "people/isaki_riona/card.md",
+   "collection_status": "structured_cached",
+   "readings": [
+    "いさき りおな"
+   ],
+   "handles": [
+    "@isakiriona"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "一条莉々華",
+   "slug": "ichijou_ririka",
+   "region": "JP",
+   "generation": "ReGLOSS",
+   "card_path": "people/ichijou_ririka/card.md",
+   "collection_status": "structured_cached",
+   "readings": [
+    "いちじょう りりか"
+   ],
+   "handles": [
+    "@ichijouririka"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "儒烏風亭らでん",
+   "slug": "juufuutei_raden",
+   "region": "JP",
+   "generation": "ReGLOSS",
+   "card_path": "people/juufuutei_raden/card.md",
+   "collection_status": "structured_cached",
+   "readings": [
+    "じゅうふうてい らでん"
+   ],
+   "handles": [
+    "@juufuuteiraden"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "火威青",
+   "slug": "hiodoshi_ao",
+   "region": "JP",
+   "generation": "ReGLOSS",
+   "card_path": "people/hiodoshi_ao/card.md",
+   "collection_status": "structured_cached",
+   "readings": [
+    "ひおどし あお"
+   ],
+   "handles": [
+    "@hiodoshiao"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 「卒業生」欄に掲載（元DEV_IS ReGLOSS）"
+  },
+  {
+   "name": "轟はじめ",
+   "slug": "todoroki_hajime",
+   "region": "JP",
+   "generation": "ReGLOSS",
+   "card_path": "people/todoroki_hajime/card.md",
+   "collection_status": "structured_cached",
+   "readings": [
+    "とどろき はじめ"
+   ],
+   "handles": [
+    "@todoroki_hajime"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "音乃瀬奏",
+   "slug": "otonose_kanade",
+   "region": "JP",
+   "generation": "ReGLOSS",
+   "card_path": "people/otonose_kanade/card.md",
+   "collection_status": "structured_cached",
+   "readings": [
+    "おとのせ かなで"
+   ],
+   "handles": [
+    "@otonosekanade"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "ラプラス・ダークネス",
+   "slug": "laplus_darknesss",
+   "region": "JP",
+   "generation": "holoX",
+   "card_path": "people/laplus_darknesss/card.md",
+   "collection_status": "structured_cached",
+   "readings": [],
+   "handles": [
+    "@LaplusDarknesss",
+    "@wagahaida_L"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "博衣こより",
+   "slug": "hakui_koyori",
+   "region": "JP",
+   "generation": "holoX",
+   "card_path": "people/hakui_koyori/card.md",
+   "collection_status": "structured_cached",
+   "readings": [
+    "はくいこより"
+   ],
+   "handles": [
+    "@hakuikoyori"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "沙花叉クロヱ",
+   "slug": "sakamata_chloe",
+   "region": "JP",
+   "generation": "holoX",
+   "card_path": "people/sakamata_chloe/card.md",
+   "collection_status": "structured_cached",
+   "readings": [
+    "さかまたくろえ"
+   ],
+   "handles": [
+    "@sakamatachloe"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載（【配信活動終了】の注記あり）"
+  },
+  {
+   "name": "風真いろは",
+   "slug": "kazama_iroha",
+   "region": "JP",
+   "generation": "holoX",
+   "card_path": "people/kazama_iroha/card.md",
+   "collection_status": "structured_cached",
+   "readings": [
+    "かざまいろは"
+   ],
+   "handles": [
+    "@kazamairohach"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "鷹嶺ルイ",
+   "slug": "takane_lui",
+   "region": "JP",
+   "generation": "holoX",
+   "card_path": "people/takane_lui/card.md",
+   "collection_status": "structured_cached",
+   "readings": [
+    "たかねるい"
+   ],
+   "handles": [
+    "@takanelui",
+    "@sub_luilui"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "宙科そぴあ",
+   "slug": "sorashina_sopia",
+   "region": "JP",
+   "generation": "アソビ★まわり隊！",
+   "card_path": "people/sorashina_sopia/card.md",
+   "collection_status": "raw_cached",
+   "readings": [
+    "そらしな そぴあ"
+   ],
+   "handles": [
+    "@sorashina_sopia"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "熱千めら",
+   "slug": "achichi_mela",
+   "region": "JP",
+   "generation": "アソビ★まわり隊！",
+   "card_path": "people/achichi_mela/card.md",
+   "collection_status": "raw_cached",
+   "readings": [
+    "あちち めら"
+   ],
+   "handles": [
+    "@achichi_mela"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "百灯キョーコ",
+   "slug": "hyakuto_kyoko",
+   "region": "JP",
+   "generation": "アソビ★まわり隊！",
+   "card_path": "people/hyakuto_kyoko/card.md",
+   "collection_status": "raw_cached",
+   "readings": [
+    "ひゃくとう きょーこ"
+   ],
+   "handles": [
+    "@hyakuto_kyoko"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "鈴鳴つづり",
+   "slug": "suzuna_tsuzuri",
+   "region": "JP",
+   "generation": "アソビ★まわり隊！",
+   "card_path": "people/suzuna_tsuzuri/card.md",
+   "collection_status": "raw_cached",
+   "readings": [
+    "すずな つづり"
+   ],
+   "handles": [
+    "@suzuna_tsuzuri"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "大神ミオ",
+   "slug": "ookami_mio",
+   "region": "JP",
+   "generation": "ゲーマーズ",
+   "card_path": "people/ookami_mio/card.md",
+   "collection_status": "structured_cached",
+   "readings": [],
+   "handles": [
+    "@ookamimio",
+    "@ookamimio_sab"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "戌神ころね",
+   "slug": "inugami_korone",
+   "region": "JP",
+   "generation": "ゲーマーズ",
+   "card_path": "people/inugami_korone/card.md",
+   "collection_status": "structured_cached",
+   "readings": [
+    "いぬがみころね"
+   ],
+   "handles": [
+    "@inugamikorone",
+    "@k5r6n3"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "猫又おかゆ",
+   "slug": "nekomata_okayu",
+   "region": "JP",
+   "generation": "ゲーマーズ",
+   "card_path": "people/nekomata_okayu/card.md",
+   "collection_status": "structured_cached",
+   "readings": [
+    "ねこまたおかゆ"
+   ],
+   "handles": [
+    "@nekomataokayu",
+    "@MO_OKAYU_GU"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  }
+ ]
+}

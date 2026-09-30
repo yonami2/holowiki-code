@@ -1,0 +1,55 @@
+name: Verify archived cache command launchers on Windows
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  windows-cmd:
+    name: Windows / Python ${{ matrix.python }}
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ['3.9', '3.13']
+    env:
+      # The distributed .cmd files invoke "py -3" when the launcher exists.
+      PY_PYTHON3: ${{ matrix.python }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Verify and unpack the exact archived test files
+        shell: pwsh
+        run: |
+          $expected = 'e21a7c42ffb1d2fcc0a5e22d65c6f6b4671565bc1428e756f097287a57353db2'
+          $actual = (Get-FileHash ci/windows_cmd_fixture.tar.gz -Algorithm SHA256).Hash.ToLowerInvariant()
+          if ($actual -ne $expected) { throw "Archive checksum mismatch: $actual" }
+          tar -xzf ci/windows_cmd_fixture.tar.gz
+      - name: Confirm the command launcher selects the matrix Python
+        shell: pwsh
+        run: |
+          $actual = py -3 -c "import sys; print(str(sys.version_info.major) + '.' + str(sys.version_info.minor))"
+          if ($actual -ne '${{ matrix.python }}') { throw "py -3 selected $actual; expected ${{ matrix.python }}" }
+      - name: Execute distributed CMD launchers through cmd.exe
+        shell: pwsh
+        working-directory: hololive_wiki_person_cache
+        run: |
+          python -c "import unittest; s=unittest.defaultTestLoader.discover('tests',pattern='test_windows_launchers.py'); r=unittest.TextTestRunner(verbosity=2).run(s); assert r.wasSuccessful() and r.testsRun == 5 and len(r.skipped) == 0, 'Windows launcher tests failed or were skipped'"
+      - name: Run the shipped selftest.cmd and verify launcher bytes
+        shell: pwsh
+        working-directory: hololive_wiki_person_cache
+        run: |
+          python -c "import os,sys; from pathlib import Path; sys.path.insert(0,'tests'); import test_person_cache as h; p=Path(os.environ['RUNNER_TEMP'])/'cache-cmd-selftest'; h.write_v1(p/'in'); h.write_snapshots(p/'snapshots'); h.builder.build(p/'in',p/'out'/'hololive_wiki_person_cache',wiki_root_json=h.wiki_root(p/'root.json'),snapshots_dir=p/'snapshots')"
+          if ($LASTEXITCODE -ne 0) { throw 'Failed to build synthetic cache' }
+          $built = Join-Path $env:RUNNER_TEMP 'cache-cmd-selftest/out/hololive_wiki_person_cache'
+          foreach ($file in @('hololive_cache.cmd', 'selftest.cmd', 'tools/hololive_wiki_reader.cmd')) {
+            $shipped = (Get-FileHash $file -Algorithm SHA256).Hash
+            $generated = (Get-FileHash (Join-Path $built $file) -Algorithm SHA256).Hash
+            if ($shipped -ne $generated) { throw "Generated launcher differs from shipped $file" }
+          }
+          & (Join-Path $built 'selftest.cmd')
+          if ($LASTEXITCODE -ne 0) { throw "selftest.cmd returned $LASTEXITCODE" }

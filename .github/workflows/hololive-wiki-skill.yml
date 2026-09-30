@@ -1,0 +1,136 @@
+name: hololive-wiki skill
+
+# Checks the skill package on real Windows, Linux and macOS: the wrapper, the
+# lookup script, the story pack, the shipped copies and the archive's own
+# offline tests. No step contacts the wiki.
+on:
+  push:
+    paths:
+      - "hololive-wiki/**"
+      - ".github/workflows/hololive-wiki-skill.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: ${{ matrix.os }} / Python ${{ matrix.python }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest]
+        python: ["3.9", "3.13"]
+        include:
+          - os: ubuntu-latest
+            python: "3.10"
+          - os: ubuntu-latest
+            python: "3.11"
+          - os: ubuntu-latest
+            python: "3.12"
+          - os: macos-latest
+            python: "3.13"
+    defaults:
+      run:
+        working-directory: hololive-wiki
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+
+      # Ubuntu's AppArmor blocks unprivileged user namespaces by default; allowing them lets the
+      # skill test run the wrapper inside one (/ and /tmp owned by the overflow uid, as in bubblewrap).
+      - name: Allow unprivileged user namespaces (Linux)
+        if: ${{ runner.os == 'Linux' }}
+        working-directory: .
+        run: sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0 || true
+
+      - name: Skill tests (wrapper, lookup, story pack, shipped copies)
+        run: python -m unittest discover -s tests -v
+
+      - name: Archive tests in an unpacked copy
+        if: ${{ !cancelled() }}
+        shell: python
+        run: |
+          import os, subprocess, sys, tarfile
+          target = os.path.join(os.environ["RUNNER_TEMP"], "arc")
+          with tarfile.open(os.path.join("cache", "hololive_wiki_person_cache.tar.xz"), "r:xz") as archive:
+              archive.extractall(target)
+          root = os.path.join(target, "hololive_wiki_person_cache")
+          subprocess.run([sys.executable, "hololive_cache.py", "verify"], cwd=root, check=True)
+          sys.exit(subprocess.run([sys.executable, "-m", "unittest", "discover", "-s", "tests", "-v"], cwd=root).returncode)
+
+      - name: Reuse overhead of the wrapper (informational)
+        if: ${{ !cancelled() }}
+        shell: python
+        run: |
+          import importlib.util, os, statistics, subprocess, sys, time
+          os.environ["HOLOLIVE_WIKI_CACHE_DIR"] = os.path.join(os.environ["RUNNER_TEMP"], "reuse")
+          spec = importlib.util.spec_from_file_location("wrapper", os.path.join("scripts", "hololive_cache.py"))
+          wrapper = importlib.util.module_from_spec(spec)
+          spec.loader.exec_module(wrapper)
+          root = wrapper.ensure_cache()
+
+          def median_ms(action, rounds=7):
+              values = []
+              for _ in range(rounds):
+                  started = time.perf_counter()
+                  action()
+                  values.append((time.perf_counter() - started) * 1000)
+              return round(statistics.median(values), 1)
+
+          def names_only():
+              # A scan that reads names only (no per-file stat), for comparison.
+              for _ in os.walk(root):
+                  pass
+
+          def run(*argv):
+              subprocess.run([sys.executable, *argv], stdout=subprocess.DEVNULL, check=True)
+
+          print("complete check (ms):", median_ms(lambda: wrapper._complete(root)))
+          print("names-only scan (ms):", median_ms(names_only))
+          print("python -c pass (ms):", median_ms(lambda: run("-c", "pass")))
+          print("wrapper --cache-root (ms):", median_ms(lambda: run(os.path.join("scripts", "hololive_cache.py"), "--cache-root")))
+          print("wrapper show (ms):", median_ms(lambda: run(os.path.join("scripts", "hololive_cache.py"), "show", "houshou_marine")))
+          print("unpacked CLI show, no wrapper (ms):", median_ms(lambda: run("-B", str(root / "hololive_cache.py"), "show", "houshou_marine")))
+          print("wrapper story, 2 people (ms):", median_ms(lambda: run(os.path.join("scripts", "hololive_cache.py"), "story", "houshou_marine", "usada_pekora")))
+
+      - name: selftest.cmd (Windows)
+        if: ${{ !cancelled() && runner.os == 'Windows' }}
+        shell: cmd
+        run: call "%RUNNER_TEMP%\arc\hololive_wiki_person_cache\selftest.cmd"
+
+      - name: Spaces in paths, exit codes and output order (Windows)
+        if: ${{ !cancelled() && runner.os == 'Windows' }}
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $source = Split-Path (Get-Command python).Source
+          $python = "C:\Program Files\Py Copy\python.exe"
+          Copy-Item $source "C:\Program Files\Py Copy" -Recurse
+          $spaced = Join-Path $env:RUNNER_TEMP "temp with space"
+          New-Item -ItemType Directory $spaced | Out-Null
+          $env:TMP = $spaced; $env:TEMP = $spaced
+          $wrapper = "scripts\hololive_cache.py"
+
+          & $python $wrapper read "Gawr Gura" --section 公式情報 --lines 3
+          if ($LASTEXITCODE -ne 0) { throw "read ""Gawr Gura"" failed: $LASTEXITCODE" }
+          & $python $wrapper scene "Gawr Gura" "Mori Calliope" --brief
+          if ($LASTEXITCODE -ne 0) { throw "scene failed: $LASTEXITCODE" }
+          & $python $wrapper show 存在しない人
+          if ($LASTEXITCODE -ne 1) { throw "exit code of an unknown name is $LASTEXITCODE, not 1" }
+          $root = & $python $wrapper --cache-root
+          # The wrapper prints the resolved folder (long names, not 8.3 short names).
+          $expected = & $python -c "import os, sys; print(os.path.realpath(sys.argv[1]))" $spaced
+          if (-not $root.StartsWith($expected + "\", [System.StringComparison]::OrdinalIgnoreCase)) {
+            throw "unpacked outside the temp folder: $root (expected under $expected)"
+          }
+
+          $lines = cmd /c """$python"" $wrapper show houshou_marine & echo AFTER-MARKER"
+          if ($lines[-1].Trim() -ne "AFTER-MARKER") { throw "output arrived after the command ended" }
+          if (-not ($lines[0] -match "\| JP \|")) { throw "unexpected first line: $($lines[0])" }
+          & $python "scripts\hololive_cache_lookup.py" sakura_miko --summary | Out-File -Encoding utf8 lookup.json
+          if ($LASTEXITCODE -ne 0) { throw "lookup failed: $LASTEXITCODE" }
+          Write-Output "all Windows scenarios passed"
