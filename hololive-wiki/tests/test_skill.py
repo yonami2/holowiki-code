@@ -1,0 +1,622 @@
+"""Skill package checks: identical shipped copies, the wrapper, the lookup script and the story pack.
+
+Run from the skill root (no network; the archive is unpacked into temporary folders):
+
+    python3 -m unittest discover -s tests -v          (Windows: python or py -3)
+
+Each run unpacks the archive a few times (about 2 seconds each on a desktop).
+"""
+import hashlib
+import importlib.util
+import json
+import os
+import re
+import shutil
+import stat
+import subprocess
+import sys
+import tarfile
+import tempfile
+import unittest
+from pathlib import Path
+from unittest import mock
+
+SKILL = Path(__file__).resolve().parents[1]
+SCRIPTS = SKILL / "scripts"
+CACHE = SKILL / "cache"
+ARCHIVE = CACHE / "hololive_wiki_person_cache.tar.xz"
+WRAPPER = SCRIPTS / "hololive_cache.py"
+LOOKUP = SCRIPTS / "hololive_cache_lookup.py"
+ROOT = "hololive_wiki_person_cache/"
+SPEC = importlib.util.spec_from_file_location("skill_wrapper_tests", WRAPPER)
+wrapper = importlib.util.module_from_spec(SPEC)
+SPEC.loader.exec_module(wrapper)
+
+
+def archive_member(name):
+    with tarfile.open(ARCHIVE, "r:xz") as archive:
+        return archive.extractfile(ROOT + name).read()
+
+
+def run(argv, cache_dir, extra_env=None, cwd=None):
+    env = dict(os.environ)
+    env["HOLOLIVE_WIKI_CACHE_DIR"] = str(cache_dir)
+    env.update(extra_env or {})
+    process = subprocess.run([sys.executable, *map(str, argv)], stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                             env=env, cwd=str(cwd or SKILL))
+    return process.returncode, process.stdout.decode("utf-8"), process.stderr.decode("utf-8", "replace")
+
+
+def private_file(path, data):
+    """A file of this user that the wrapper accepts whatever the umask of the test run (e.g. 002)."""
+    path.write_bytes(data.encode("utf-8") if isinstance(data, str) else bytes(data))
+    os.chmod(path, 0o600)
+
+
+def private_folder(path):
+    path.mkdir(mode=0o700)
+    os.chmod(path, 0o700)
+
+
+class ShippedCopiesTests(unittest.TestCase):
+    def test_wrapper_names_the_archive_it_ships_with(self):
+        digest = hashlib.sha256(ARCHIVE.read_bytes()).hexdigest()
+        text = WRAPPER.read_text(encoding="utf-8")
+        self.assertIn(f'ARCHIVE_SHA256 = "{digest}"', text)
+
+    def test_wrapper_names_the_manifest_it_checks_against(self):
+        digest = hashlib.sha256(archive_member("MANIFEST.sha256")).hexdigest()
+        self.assertIn(f'MANIFEST_SHA256 = "{digest}"', WRAPPER.read_text(encoding="utf-8"))
+
+    def test_scripts_are_the_archive_versions(self):
+        pairs = {"hololive_names.py": "hololive_names.py", "hololive_wiki_reader.py": "tools/hololive_wiki_reader_v31.py",
+                 "hololive_adblock.py": "tools/hololive_adblock.py"}
+        for script, member in pairs.items():
+            with self.subTest(script=script):
+                self.assertEqual((SCRIPTS / script).read_bytes(), archive_member(member))
+
+    def test_cache_files_are_the_archive_versions(self):
+        pairs = {"names_82.json": "names.json", "quick_profiles_82.json": "hololive_wiki_quick_profiles_82.json",
+                 "roster_82.json": "hololive_wiki_roster_82.json"}
+        for name, member in pairs.items():
+            with self.subTest(name=name):
+                self.assertEqual((CACHE / name).read_bytes(), archive_member(member))
+
+    def test_companion_files_carry_no_bare_fiction_flag(self):
+        for name in ("quick_profiles_82.json", "roster_82.json"):
+            data = json.loads((CACHE / name).read_text(encoding="utf-8"))
+            self.assertNotIn("fictional_world_no_graduates", data)
+            self.assertIn("会話", data["fictional_world_note"]["applies_only_when"])
+            self.assertEqual(len(data["people"]), 82)
+
+    def test_skill_md_frontmatter(self):
+        text = (SKILL / "SKILL.md").read_text(encoding="utf-8")
+        match = re.match(r"^---\nname: ([a-z0-9-]+)\ndescription: >-\n((?:  .*\n)+)---\n", text)
+        self.assertIsNotNone(match)
+        self.assertEqual(match.group(1), "hololive-wiki")
+        description = " ".join(line.strip() for line in match.group(2).splitlines())
+        self.assertLessEqual(len(description), 1024)
+        self.assertNotRegex(description, r"[<>]")
+        for link in re.findall(r"\]\(((?:references|scripts|cache)/[^)#]+)", text):
+            self.assertTrue((SKILL / link).is_file(), link)
+
+
+class WrapperTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.tmp = tempfile.TemporaryDirectory(prefix="hololive skill ")      # a space in the path, on purpose
+        cls.cache_dir = Path(cls.tmp.name) / "cache dir"
+        code, out, err = run([WRAPPER, "--cache-root"], cls.cache_dir)
+        assert code == 0, err
+        cls.root = Path(out.strip())
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.tmp.cleanup()
+
+    def test_unpacked_where_asked_and_private(self):
+        # The wrapper prints the resolved folder: /private/var on macOS, long names instead of RUNNER~1 on Windows.
+        asked = os.path.normcase(os.path.realpath(self.cache_dir))
+        self.assertTrue(os.path.normcase(str(self.root)).startswith(asked + os.sep), (self.root, asked))
+        self.assertTrue((self.root / "MANIFEST.sha256").is_file())
+        if os.name == "posix":
+            self.assertEqual(stat.S_IMODE(os.stat(self.root.parent).st_mode) & 0o077, 0)
+
+    def test_reuse_imports_nothing_needed_only_to_unpack(self):
+        env = dict(os.environ, HOLOLIVE_WIKI_CACHE_DIR=str(self.cache_dir))
+
+        def imported(*argv):
+            process = subprocess.run([sys.executable, "-X", "importtime", *argv],
+                                     stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=env)
+            self.assertEqual(process.returncode, 0, process.stderr.decode("utf-8", "replace")[-500:])
+            return {line.rpartition("|")[2].strip() for line in process.stderr.decode("utf-8", "replace").splitlines()
+                    if line.startswith("import time:")}
+        # A Python whose startup (sitecustomize, .pth files) already imports some of these is not the wrapper's doing.
+        by_wrapper = imported(str(WRAPPER), "--cache-root") - imported("-c", "pass")
+        self.assertFalse(by_wrapper & {"tarfile", "lzma", "tempfile", "subprocess", "shutil", "pathlib"}, sorted(by_wrapper))
+
+    def test_a_python_without_lzma_is_told_what_to_do(self):
+        # A Python built without the lzma module cannot read the .tar.xz archive: say so, not "damaged".
+        with tempfile.TemporaryDirectory() as td:
+            (Path(td) / "lzma.py").write_text("raise ImportError('this build has no lzma')\n", encoding="utf-8")
+            code, out, err = run([WRAPPER, "--cache-root"], Path(td) / "cache", {"PYTHONPATH": td})
+        self.assertEqual((code, out), (1, ""))
+        self.assertTrue(err.startswith("Cache initialization failed: "), err)
+        self.assertIn("this Python has no lzma module", err)
+        self.assertIn("hololive_cache_lookup.py", err)
+        self.assertNotIn("damaged", err)
+
+    def test_arguments_with_spaces_exit_codes_and_utf8(self):
+        code, out, err = run([WRAPPER, "read", "Gawr Gura", "--section", "公式情報", "--lines", "3"], self.cache_dir)
+        self.assertEqual(code, 0, err)
+        self.assertIn("# Gawr Gura", out)
+        code, out, err = run([WRAPPER, "scene", "Gawr Gura", "Mori Calliope", "--brief"], self.cache_dir)
+        self.assertEqual(code, 0, err)
+        self.assertIn("- Gawr Gura→Mori Calliope:", out)
+        code, out, err = run([WRAPPER, "show", "存在しない人"], self.cache_dir)
+        self.assertEqual(code, 1)
+        self.assertIn("該当する人物がいません", err)
+        code, out, err = run([WRAPPER, "show", "フブちゃん"], self.cache_dir, {"PYTHONIOENCODING": "cp1252"})
+        self.assertEqual(code, 0, err)
+        self.assertTrue(out.startswith("白上フブキ | JP"))
+
+    def test_story_status_and_help(self):
+        code, out, err = run([WRAPPER, "story", "宝鐘マリン", "兎田ぺこら", "--topic", "料理"], self.cache_dir)
+        self.assertEqual(code, 0, err)
+        self.assertTrue(out.startswith("# 物語用資料パック: 宝鐘マリン × 兎田ぺこら"))
+        self.assertIn("コンビ・ユニット名: ぺこマリ", out)
+        self.assertIn("### 話題「料理」", out)
+        code, out, err = run([WRAPPER, "status", "天音かなた", "--format", "json"], self.cache_dir)
+        self.assertEqual(code, 0, err)
+        self.assertEqual(json.loads(out)["people"][0]["category"], "graduated")
+        code, out, err = run([WRAPPER, "--status"], self.cache_dir)
+        report = json.loads(out)
+        self.assertTrue(report["archive_sha256_ok"])
+        self.assertEqual(report["candidates"][0]["complete"], True)
+
+    def test_no_bytecode_is_written_into_the_cache(self):
+        for argv in (["show", "宝鐘マリン"], ["story", "兎田ぺこら"], ["verify"]):
+            code, out, err = run([WRAPPER, *argv], self.cache_dir)
+            self.assertEqual(code, 0, err)
+        self.assertEqual(sorted(self.root.rglob("__pycache__")), [])
+
+    def test_no_arguments_prints_usage_without_unpacking(self):
+        with tempfile.TemporaryDirectory() as td:
+            code, out, err = run([WRAPPER], Path(td) / "never")
+            self.assertEqual(code, 2)
+            self.assertIn("usage: hololive_cache.py", err)
+            self.assertFalse((Path(td) / "never").exists())
+
+    def test_lookup_without_unpacking_and_with_the_card(self):
+        with tempfile.TemporaryDirectory() as td:
+            empty = Path(td) / "unused"
+            code, out, err = run([LOOKUP, "--list"], empty, {"PYTHONIOENCODING": "cp1252"})
+            self.assertEqual(code, 0, err)
+            self.assertEqual(len(out.splitlines()), 82)
+            self.assertIn("湊あくあ\tminato_aqua\twikiトップ", out)
+            code, out, err = run([LOOKUP, "ししろん", "--summary"], empty, {"PYTHONIOENCODING": "cp1252"})
+            self.assertEqual(code, 0, err)
+            record = json.loads(out)
+            self.assertEqual(record["name"], "獅白ぼたん")
+            self.assertEqual(record["matched"]["via"], "nickname")
+            self.assertIn("@shishirobotan", record["handles"])
+            code, out, err = run([LOOKUP, "@FUWAMOCO_EN", "--summary"], empty)
+            self.assertEqual(code, 1)
+            self.assertIn("Fuwawa Abyssgard", err)
+            self.assertFalse(empty.exists())
+        code, out, err = run([LOOKUP, "さくらみこ"], self.cache_dir, {"PYTHONIOENCODING": "cp932"})
+        self.assertEqual(code, 0, err)
+        self.assertIn("🌸", out)
+
+    def test_lookup_list_ends_quietly_when_its_reader_stops(self):
+        # `--list | head -1`: the pipe is closed before the list is written. As for the cache CLI and the
+        # reader, that is not an error: exit code 0 and no traceback.
+        with tempfile.TemporaryDirectory() as td:
+            env = dict(os.environ, HOLOLIVE_WIKI_CACHE_DIR=str(Path(td) / "unused"))
+            process = subprocess.Popen([sys.executable, str(LOOKUP), "--list"], stdout=subprocess.PIPE,
+                                       stderr=subprocess.PIPE, env=env, cwd=str(SKILL))
+            process.stdout.close()
+            err = process.stderr.read().decode("utf-8", "replace")
+            process.stderr.close()
+            self.assertEqual((process.wait(), err), (0, ""))
+
+
+class RepairTests(unittest.TestCase):
+    def fresh(self):
+        tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(tmp.cleanup)
+        cache_dir = Path(tmp.name)
+        code, out, err = run([WRAPPER, "--cache-root"], cache_dir)
+        self.assertEqual(code, 0, err)
+        return cache_dir, Path(out.strip())
+
+    def test_missing_manifest_or_page_is_unpacked_again(self):
+        cache_dir, root = self.fresh()
+        (root / "MANIFEST.sha256").unlink()
+        page = next((root / "people" / "houshou_marine" / "pages").glob("*.txt"))
+        code, out, err = run([WRAPPER, "read", "宝鐘マリン", page.stem, "--lines", "1"], cache_dir)
+        self.assertEqual(code, 0, err)
+        self.assertTrue((root / "MANIFEST.sha256").is_file())
+        page.unlink()
+        code, out, err = run([WRAPPER, "read", "宝鐘マリン", page.stem, "--lines", "1"], cache_dir)
+        self.assertEqual(code, 0, err)
+        self.assertTrue(page.is_file())
+        leftovers = [p.name for p in cache_dir.iterdir() if not p.name.endswith(".lock")]
+        self.assertEqual(len(leftovers), 1, leftovers)
+
+    def test_every_file_removed_but_folders_kept(self):
+        cache_dir, root = self.fresh()
+        for path in root.rglob("*"):
+            if path.is_file():
+                path.unlink()
+        code, out, err = run([WRAPPER, "show", "宝鐘マリン"], cache_dir)
+        self.assertEqual(code, 0, err)
+        code, out, err = run([WRAPPER, "verify"], cache_dir)
+        self.assertEqual(code, 0, out + err)
+
+    def test_truncated_manifest_page_and_changed_python_are_repaired(self):
+        cache_dir, root = self.fresh()
+        manifest = root / "MANIFEST.sha256"
+        manifest.write_text(manifest.read_text(encoding="utf-8").splitlines()[0] + "\n", encoding="utf-8")
+        self.assertFalse(wrapper._complete(root))
+        code, out, err = run([WRAPPER, "show", "宝鐘マリン"], cache_dir)
+        self.assertEqual(code, 0, err)
+        page = next((root / "people" / "houshou_marine" / "pages").glob("*.txt"))
+        page.write_bytes(b"")
+        self.assertFalse(wrapper._complete(root))
+        code, out, err = run([WRAPPER, "show", "宝鐘マリン"], cache_dir)
+        self.assertEqual(code, 0, err)
+        core = root / "hololive_cache_core.py"
+        source = core.read_bytes()
+        core.write_bytes(b"#" * len(source))  # Same size: Python source must still be hashed.
+        self.assertFalse(wrapper._complete(root))
+        code, out, err = run([WRAPPER, "show", "宝鐘マリン"], cache_dir)
+        self.assertEqual(code, 0, err)
+        self.assertTrue(out.startswith("宝鐘マリン | JP"))
+
+    def same_size_change(self, path, old, new):
+        data = path.read_bytes()
+        changed = data.replace(old.encode(), new.encode(), 1)
+        self.assertEqual((len(changed), changed != data), (len(data), True))
+        private_file(path, changed)
+        return data
+
+    def test_same_size_change_is_caught_when_the_file_is_read(self):
+        cache_dir, root = self.fresh()
+        digest = root / "people" / "shirogane_noel" / "digest.md"
+        original = self.same_size_change(digest, "白銀ノエル", "黒金ノエル")
+        self.assertTrue(wrapper._complete(root))        # the scan compares sizes: it cannot tell
+        code, out, err = run([WRAPPER, "show", "白銀ノエル", "--digest"], cache_dir)
+        self.assertEqual(code, 0, err)
+        self.assertNotIn("黒金ノエル", out)
+        self.assertEqual(out.count("白銀ノエル | JP"), 1)   # the header printed before the read, once
+        self.assertIn("unpacking it again", err)
+        self.assertEqual(digest.read_bytes(), original)
+        card = root / "people" / "sakura_miko" / "card.md"
+        self.same_size_change(card, "さくらみこ", "さくらみそ")
+        code, out, err = run([LOOKUP, "さくらみこ"], cache_dir)
+        self.assertEqual(code, 0, err)
+        self.assertNotIn("さくらみそ", out)
+
+    def test_another_cache_is_checked_against_its_own_manifest(self):
+        cache_dir, root = self.fresh()
+        other = cache_dir / "other cache"
+        names = ["catalog.json", "names.json"] + sorted(
+            path.relative_to(root).as_posix() for path in (root / "people" / "shirogane_noel").rglob("*") if path.is_file())
+        lines = []
+        for name in names:
+            target = other.joinpath(*name.split("/"))
+            target.parent.mkdir(parents=True, exist_ok=True)
+            data = (root / name).read_bytes()
+            private_file(target, data)
+            lines.append(hashlib.sha256(data).hexdigest() + "  " + name)
+        private_file(other / "MANIFEST.sha256", "\n".join(lines) + "\n")
+        argv = [WRAPPER, "--cache", other, "show", "白銀ノエル", "--digest"]
+        code, out, err = run(argv, cache_dir)
+        self.assertEqual(code, 0, err)
+        self.assertIn("白銀ノエル | JP", out)
+        self.assertIn("MANIFEST.sha256 と照合します", err)
+        self.same_size_change(other / "people" / "shirogane_noel" / "digest.md", "白銀ノエル", "黒金ノエル")
+        code, out, err = run(argv, cache_dir)
+        self.assertEqual(code, 1)
+        self.assertNotIn("黒金ノエル", out)
+        self.assertIn("--cache のキャッシュのファイルが", err)
+        self.assertNotIn("unpacking it again", err)          # not the skill's copy: nothing to unpack
+        (other / "MANIFEST.sha256").unlink()
+        code, out, err = run(argv, cache_dir)
+        self.assertEqual((code, out), (1, ""))
+        self.assertIn("MANIFEST.sha256 がありません", err)
+
+    def test_manifest_changed_with_the_receipt_is_not_trusted(self):
+        cache_dir, root = self.fresh()
+        page = root / "people" / "houshou_marine" / "pages" / "main.txt"
+        data = page.read_bytes()
+        changed = data.replace("宝鐘マリン".encode(), "改変マリン".encode(), 1)
+        private_file(page, changed)
+        manifest = root / "MANIFEST.sha256"
+        lines = manifest.read_text(encoding="utf-8").splitlines()
+        new_digest = hashlib.sha256(changed).hexdigest()
+        lines = [new_digest + "  " + line.split("  ", 1)[1] if line.endswith("  people/houshou_marine/pages/main.txt")
+                 else line for line in lines]
+        private_file(manifest, "\n".join(lines) + "\n")
+        receipt = root.parent / ".wrapper-receipt.json"
+        record = json.loads(receipt.read_text(encoding="utf-8"))
+        record["manifest_sha256"] = hashlib.sha256(manifest.read_bytes()).hexdigest()
+        private_file(receipt, json.dumps(record))
+        self.assertFalse(wrapper._complete(root))        # MANIFEST_SHA256 comes with the skill
+        code, out, err = run([WRAPPER, "read", "宝鐘マリン", "main", "--find", "改変マリン"], cache_dir)
+        self.assertEqual(page.read_bytes(), data)
+
+    def test_bytecode_in_the_cache_is_never_run(self):
+        cache_dir, root = self.fresh()
+        import importlib._bootstrap_external as external
+        source = root / "hololive_cache_core.py"
+        info = os.stat(source)
+        code = compile(source.read_text(encoding="utf-8") + "\nprint('TAMPERED BYTECODE RAN')\n", str(source), "exec")
+        # Plant bytecode inside this cache, regardless of the test runner's
+        # optional external bytecode prefix. The plain-import probe must use
+        # that same location; wrapper runs keep the inherited environment.
+        with mock.patch.object(sys, "pycache_prefix", None):
+            pyc = Path(importlib.util.cache_from_source(str(source)))
+        probe_env = dict(os.environ)
+        probe_env.pop("PYTHONPYCACHEPREFIX", None)
+        pyc.parent.mkdir(mode=0o700, exist_ok=True)
+        private_file(pyc, external._code_to_timestamp_pyc(code, info.st_mtime, info.st_size))
+        probe = subprocess.run([sys.executable, "-c",
+                                "import sys; sys.path.insert(0, sys.argv[1]); import hololive_cache_core", str(root)], cwd=str(root),
+                               stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=probe_env)
+        self.assertIn(b"TAMPERED", probe.stdout)            # a plain import would run it
+        self.assertTrue(wrapper._complete(root))            # bytecode is allowed in the folder ...
+        for argv in ([WRAPPER, "show", "宝鐘マリン"], [WRAPPER, "story", "宝鐘マリン"]):
+            code, out, err = run(argv, cache_dir)
+            self.assertEqual(code, 0, err)
+            self.assertNotIn("TAMPERED", out + err)          # ... but the wrapper never runs it
+        direct = subprocess.run([sys.executable, str(root / "hololive_cache.py"), "verify"], cwd=str(root),
+                                stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=probe_env)
+        self.assertNotIn(b"TAMPERED", direct.stdout)       # verify runs from the source it checks
+        report = json.loads(direct.stdout.decode("utf-8"))
+        self.assertEqual((direct.returncode, report["ok"], report["bytecode_files"]), (0, True, 1))
+        self.assertIn("bytecode_note", report)
+
+    def test_whole_folder_removed_or_strays_added_are_repaired(self):
+        cache_dir, root = self.fresh()
+        shutil.rmtree(root / "people" / "houshou_marine")
+        self.assertFalse(wrapper._complete(root))
+        code, out, err = run([WRAPPER, "show", "宝鐘マリン"], cache_dir)
+        self.assertEqual(code, 0, err)
+        self.assertTrue(wrapper._complete(root))
+        for stray in (root / "people" / "stray.txt", root / "stray folder" / "note.txt", root / "stray folder 2"):
+            with self.subTest(stray=stray.name):
+                if stray.suffix:
+                    stray.parent.mkdir(exist_ok=True)
+                    private_file(stray, "not in the manifest")
+                else:
+                    stray.mkdir()
+                self.assertFalse(wrapper._complete(root))
+                code, out, err = run([WRAPPER, "show", "宝鐘マリン"], cache_dir)
+                self.assertEqual(code, 0, err)
+                self.assertFalse(stray.exists())
+        pycache = root / "__pycache__"                        # bytecode written by the runs is allowed
+        pycache.mkdir(mode=0o700, exist_ok=True)
+        private_file(pycache / "extra.cpython-39.pyc.12345", b"")   # Python's temporary name while writing
+        self.assertTrue(wrapper._complete(root))
+
+    def test_concurrent_initializers_share_one_complete_copy(self):
+        with tempfile.TemporaryDirectory() as td:
+            cache_dir = Path(td) / "new cache directory"
+            env = dict(os.environ, HOLOLIVE_WIKI_CACHE_DIR=str(cache_dir))
+            commands = [subprocess.Popen([sys.executable, str(WRAPPER), "--cache-root"],
+                                        stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=env)
+                        for _ in range(6)]
+            outputs = []
+            for command in commands:
+                out, err = command.communicate(timeout=60)
+                self.assertEqual(command.returncode, 0, err.decode("utf-8", "replace"))
+                outputs.append(out.decode("utf-8").strip())
+            self.assertEqual(len(set(outputs)), 1)
+            self.assertTrue(wrapper._complete(Path(outputs[0])))
+            self.assertEqual(sorted(p.name for p in cache_dir.iterdir()),
+                             sorted([wrapper.FOLDER, wrapper.FOLDER + ".lock"]))
+
+    @unittest.skipUnless(os.name == "posix", "symlink and permission checks are POSIX")
+    def test_nested_symlink_and_writable_source_are_repaired(self):
+        cache_dir, root = self.fresh()
+        core = root / "hololive_cache_core.py"
+        os.chmod(core, 0o666)
+        self.assertFalse(wrapper._complete(root))
+        code, out, err = run([WRAPPER, "show", "宝鐘マリン"], cache_dir)
+        self.assertEqual(code, 0, err)
+        page = next((root / "people" / "houshou_marine" / "pages").glob("*.txt"))
+        external = cache_dir / "external-page"
+        external.write_bytes(page.read_bytes())
+        page.unlink()
+        page.symlink_to(external)
+        self.assertFalse(wrapper._complete(root))
+        code, out, err = run([WRAPPER, "show", "宝鐘マリン"], cache_dir)
+        self.assertEqual(code, 0, err)
+        self.assertFalse(page.is_symlink())
+
+    @unittest.skipUnless(os.name == "posix", "folder permissions are POSIX")
+    def test_untrusted_directory_planted_during_extraction_is_refused(self):
+        with tempfile.TemporaryDirectory() as td:
+            dest = Path(td) / wrapper.FOLDER
+            code = b"def run_cli(): return 0\n"
+            manifest = hashlib.sha256(code).hexdigest() + "  hololive_cache_core.py\n"
+            def plant(staging):
+                root = staging / wrapper.ROOT_NAME
+                private_folder(root)
+                private_file(root / "hololive_cache_core.py", code)
+                private_file(root / "MANIFEST.sha256", manifest)
+                dest.mkdir(mode=0o777)
+                os.chmod(dest, 0o777)
+            with mock.patch.object(wrapper, "_archive_ok", return_value=True), \
+                    mock.patch.object(wrapper, "_extract", side_effect=plant), \
+                    mock.patch.object(wrapper, "_verify"), \
+                    mock.patch.object(wrapper, "MANIFEST_SHA256", hashlib.sha256(manifest.encode()).hexdigest()):
+                with self.assertRaisesRegex(ValueError, "writable by others; not used"):
+                    wrapper._unpack(dest)
+            self.assertTrue(dest.exists())
+            self.assertFalse(any("staging-" in p.name for p in Path(td).iterdir()))
+
+    @unittest.skipUnless(os.name == "posix", "folder permissions are POSIX")
+    def test_non_sticky_writable_cache_ancestor_is_refused(self):
+        with tempfile.TemporaryDirectory() as td:
+            unsafe = Path(td) / "unsafe"
+            unsafe.mkdir(mode=0o777)
+            os.chmod(unsafe, 0o777)
+            code, out, err = run([WRAPPER, "--cache-root"], unsafe / "child")
+            self.assertEqual(code, 1)
+            self.assertIn("unsafe cache ancestor", err)
+
+    def test_old_complete_versions_are_not_automatically_deleted(self):
+        with tempfile.TemporaryDirectory() as td:
+            base = Path(td)
+            old = base / (wrapper.PREFIX + wrapper._user_key() + "-" + "0" * 16)
+            private_folder(old)
+            os.utime(old, (1, 1))
+            wrapper._tidy(base, wrapper.FOLDER)
+            self.assertTrue(old.exists())
+
+    @unittest.skipUnless(os.name == "posix", "umask is POSIX")
+    def test_permissive_umask_does_not_make_reused_code_writable(self):
+        with tempfile.TemporaryDirectory() as td:
+            env = dict(os.environ, HOLOLIVE_WIKI_CACHE_DIR=td)
+            command = subprocess.run([sys.executable, str(WRAPPER), "story", "宝鐘マリン", "兎田ぺこら"],
+                                     stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=env, umask=0o002)
+            self.assertEqual(command.returncode, 0, command.stderr.decode("utf-8", "replace"))
+            self.assertTrue(wrapper._complete(Path(td) / wrapper.FOLDER / wrapper.ROOT_NAME))
+
+    def test_failed_publication_restores_or_preserves_previous_copy(self):
+        for fail_restore in (False, True):
+            with self.subTest(fail_restore=fail_restore), tempfile.TemporaryDirectory() as td:
+                dest = Path(td) / wrapper.FOLDER
+                old = dest / wrapper.ROOT_NAME
+                private_folder(dest)
+                private_folder(old)
+                private_file(old / "previous-copy", "preserve me")
+                code = b"def run_cli(): return 0\n"
+                manifest = hashlib.sha256(code).hexdigest() + "  hololive_cache_core.py\n"
+                def extract(staging):
+                    root = staging / wrapper.ROOT_NAME
+                    private_folder(root)
+                    private_file(root / "hololive_cache_core.py", code)
+                    private_file(root / "MANIFEST.sha256", manifest)
+                real_rename = os.rename
+                def fail_publication(source, target):
+                    if Path(target) == dest and (Path(source).name != "old" or fail_restore):
+                        raise PermissionError("simulated Windows file handle blocks publication")
+                    return real_rename(source, target)
+                with mock.patch.object(wrapper, "_archive_ok", return_value=True), \
+                        mock.patch.object(wrapper, "_extract", side_effect=extract), \
+                        mock.patch.object(wrapper, "_verify"), \
+                        mock.patch.object(wrapper, "MANIFEST_SHA256", hashlib.sha256(manifest.encode()).hexdigest()), \
+                        mock.patch.object(wrapper.os, "rename", side_effect=fail_publication):
+                    with self.assertRaises(PermissionError):
+                        wrapper._unpack(dest, repair=True)
+                copies = list(Path(td).rglob("previous-copy"))
+                self.assertEqual(len(copies), 1)
+                self.assertEqual(copies[0].read_text(encoding="utf-8"), "preserve me")
+                if not fail_restore:
+                    self.assertEqual(copies[0], old / "previous-copy")
+
+    @unittest.skipUnless(os.name == "posix", "folder ownership and mode bits are POSIX")
+    def test_a_folder_others_can_write_is_refused(self):
+        cache_dir, root = self.fresh()
+        os.chmod(root.parent, 0o777)
+        (root / "hololive_cache_core.py").write_text("raise SystemExit('planted code ran')\n", encoding="utf-8")
+        code, out, err = run([WRAPPER, "show", "宝鐘マリン"], cache_dir)
+        self.assertEqual(code, 1)
+        self.assertIn("writable by others; not used", err)
+        self.assertNotIn("planted code ran", out + err)
+
+
+def fake_folder(uid, mode, gid=0):
+    return os.stat_result((stat.S_IFDIR | mode, 1, 1, 2, uid, gid, 4096, 0, 0, 0))
+
+
+@unittest.skipUnless(os.name == "posix", "ownership, umask and user namespaces are POSIX")
+class LocationTests(unittest.TestCase):
+    def test_overflow_owner_is_trusted_only_inside_a_user_namespace(self):
+        # bubblewrap/unshare show root's / and /tmp as owned by the overflow uid (65534).
+        root_like, tmp_like = fake_folder(65534, 0o755), fake_folder(65534, 0o1777)
+        with mock.patch.object(wrapper, "_overflow_uid", return_value=65534):
+            self.assertIsNone(wrapper._unsafe_ancestor(root_like))
+            self.assertIsNone(wrapper._unsafe_ancestor(tmp_like))
+            self.assertIn("without the sticky bit", wrapper._unsafe_ancestor(fake_folder(65534, 0o777)))
+        with mock.patch.object(wrapper, "_overflow_uid", return_value=None):
+            self.assertIn("another user", wrapper._unsafe_ancestor(root_like))
+        other = os.getuid() + 1 if os.getuid() + 1 != 65534 else os.getuid() + 2
+        with mock.patch.object(wrapper, "_overflow_uid", return_value=65534):
+            self.assertIn("another user", wrapper._unsafe_ancestor(fake_folder(other, 0o755)))
+
+    def test_group_writable_folder_needs_a_group_of_this_user_alone(self):
+        with tempfile.TemporaryDirectory() as td:
+            shared = Path(td) / "group writable"
+            shared.mkdir()
+            os.chmod(shared, 0o775)
+            with mock.patch.object(wrapper, "_group_of_this_user_alone", return_value=True):
+                self.assertEqual(wrapper._safe_base(shared / "cache"), os.path.realpath(shared / "cache"))
+            with mock.patch.object(wrapper, "_group_of_this_user_alone", return_value=False):
+                with self.assertRaisesRegex(ValueError, "which has other members"):
+                    wrapper._safe_base(shared / "cache")
+            os.chmod(shared, 0o1777)                        # sticky: like /tmp
+            with mock.patch.object(wrapper, "_group_of_this_user_alone", return_value=False):
+                wrapper._safe_base(shared / "cache")
+
+    def test_umask_002_creates_private_folders_and_keeps_working(self):
+        with tempfile.TemporaryDirectory() as td:
+            temp = Path(td) / "tmp"
+            private_folder(temp)
+            (temp / wrapper.FOLDER).symlink_to(td)          # the temp copy is unusable: fall back to XDG
+            xdg = Path(td) / "xdg" / "nested"
+            env = {key: value for key, value in os.environ.items() if key != "HOLOLIVE_WIKI_CACHE_DIR"}
+            env.update(TMPDIR=str(temp), XDG_CACHE_HOME=str(xdg))
+            roots = []
+            for _ in range(3):
+                command = subprocess.run([sys.executable, str(WRAPPER), "show", "宝鐘マリン"], stdout=subprocess.PIPE,
+                                         stderr=subprocess.PIPE, env=env, umask=0o002)
+                self.assertEqual(command.returncode, 0, command.stderr.decode("utf-8", "replace"))
+                self.assertTrue(command.stdout.decode("utf-8").startswith("宝鐘マリン | JP"))
+                roots.append(subprocess.run([sys.executable, str(WRAPPER), "--cache-root"], stdout=subprocess.PIPE,
+                                            env=env, umask=0o002).stdout.decode("utf-8").strip())
+            self.assertEqual(len(set(roots)), 1)
+            self.assertTrue(roots[0].startswith(os.path.realpath(xdg / "hololive-wiki") + os.sep), roots[0])
+            for folder in (xdg.parent, xdg, xdg / "hololive-wiki"):
+                self.assertEqual(stat.S_IMODE(os.stat(folder).st_mode), 0o700, folder)
+
+    def test_umask_002_override_folder_of_this_user(self):
+        with tempfile.TemporaryDirectory() as td:
+            asked = Path(td) / "made with umask 002"
+            asked.mkdir()
+            os.chmod(asked, 0o775)
+            code, out, err = run([WRAPPER, "--cache-root"], asked)
+            if wrapper._group_of_this_user_alone(os.stat(asked).st_gid):
+                self.assertEqual(code, 0, err)
+            else:                                            # a shared group: refused, with the way out
+                self.assertEqual(code, 1)
+                self.assertIn("which has other members", err)
+                self.assertIn("HOLOLIVE_WIKI_CACHE_DIR", err)
+
+    def test_user_namespace_sandbox(self):
+        """/ and /tmp owned by the overflow uid (bubblewrap, unshare): the wrapper still works."""
+        probe = None
+        for prefix in (["unshare", "--user", "--map-current-user"], ["unshare", "--user", "--map-root-user"],
+                       ["bwrap", "--unshare-user", "--dev-bind", "/", "/"]):
+            if shutil.which(prefix[0]) and subprocess.run(prefix + ["true"], stdout=subprocess.DEVNULL,
+                                                          stderr=subprocess.DEVNULL).returncode == 0:
+                probe = prefix
+                break
+        if probe is None:
+            self.skipTest("no unprivileged user namespaces here (unshare/bwrap)")
+        with tempfile.TemporaryDirectory() as td:
+            env = {key: value for key, value in os.environ.items() if key != "HOLOLIVE_WIKI_CACHE_DIR"}
+            for extra in ({"HOLOLIVE_WIKI_CACHE_DIR": str(Path(td) / "asked")}, {"TMPDIR": td}):
+                with self.subTest(extra=sorted(extra)):
+                    command = subprocess.run(probe + [sys.executable, str(WRAPPER), "show", "宝鐘マリン"],
+                                             stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=dict(env, **extra))
+                    self.assertEqual(command.returncode, 0, command.stderr.decode("utf-8", "replace"))
+                    self.assertTrue(command.stdout.decode("utf-8").startswith("宝鐘マリン | JP"))
+
+
+if __name__ == "__main__":
+    unittest.main()

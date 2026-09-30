@@ -1,0 +1,2421 @@
+{
+ "schema": "hololive-wiki-quick-profiles/3",
+ "source": "Cards and grounded summaries. Unverified fields remain null.",
+ "count": 82,
+ "fictional_world_note": {
+  "setting": "卒業生はいない",
+  "origin": "このキャッシュを作成した会話で利用者が指定した創作設定。wikiの記載ではない。",
+  "applies_only_when": "今回の会話で利用者がこの設定を採用している場合",
+  "not_for": "wikiの事実・現実の所属や活動状態の質問、別の会話の創作"
+ },
+ "wiki_status_note": "wiki（非公式）のトップページの掲載区分。公式サイトとは照合していない。物語では会話で指定された前提（例: 卒業生なしの世界）を優先する。",
+ "loader": "hololive_cache.py",
+ "people": [
+  {
+   "name": "Fuwawa Abyssgard",
+   "region": "EN",
+   "generation": "advent",
+   "slug": "fuwawa_abyssgard",
+   "aliases": null,
+   "one_line_persona": "姉として妹を大切にし、進行役を務める。",
+   "speech": "おっとり可愛い調子で『BAU BAU』。",
+   "relationships": "モココと一組のFUWAMOCOだが、各自の人物ページと違う振る舞いを持つ。",
+   "self_reference": null,
+   "source_urls": [
+    "https://seesaawiki.jp/hololivetv/d/Fuwawa%20Abyssgard"
+   ],
+   "read_status": {
+    "collection": "raw_cached",
+    "machine": "structure_checked",
+    "model_full_read": "undocumented"
+   },
+   "card_path": "people/fuwawa_abyssgard/card.md",
+   "readings": [
+    "フワワ・アビスガード"
+   ],
+   "handles": [
+    "@fuwamoco_en"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "Koseki Bijou",
+   "region": "EN",
+   "generation": "advent",
+   "slug": "koseki_bijou",
+   "aliases": null,
+   "one_line_persona": "前向きで負けず嫌い。",
+   "speech": "軽快なネットミームを次々持ち出し、強気な言葉と泣きそうな悲鳴が行き来する。",
+   "relationships": "ネリッサと親しく、カエラと長時間ゲーム、ジジとはライバルめいた掛け合い。",
+   "self_reference": "I、ビジュー",
+   "source_urls": [
+    "https://seesaawiki.jp/hololivetv/d/Koseki%20Bijou"
+   ],
+   "read_status": {
+    "collection": "raw_cached",
+    "machine": "structure_checked",
+    "model_full_read": "undocumented"
+   },
+   "card_path": "people/koseki_bijou/card.md",
+   "readings": [
+    "古石ビジュー"
+   ],
+   "handles": [
+    "@kosekibijou"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "Mococo Abyssgard",
+   "region": "EN",
+   "generation": "advent",
+   "slug": "mococo_abyssgard",
+   "aliases": null,
+   "one_line_persona": "天真爛漫で思ったことをはっきり言う。",
+   "speech": "元気な声で『BAU BAU』。",
+   "relationships": "フワワとFUWAMOCOを組み、互いをからかいながら支える。",
+   "self_reference": null,
+   "source_urls": [
+    "https://seesaawiki.jp/hololivetv/d/Mococo%20Abyssgard"
+   ],
+   "read_status": {
+    "collection": "raw_cached",
+    "machine": "structure_checked",
+    "model_full_read": "undocumented"
+   },
+   "card_path": "people/mococo_abyssgard/card.md",
+   "readings": [
+    "モココ・アビスガード"
+   ],
+   "handles": [
+    "@fuwamoco_en"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "Nerissa Ravencroft",
+   "region": "EN",
+   "generation": "advent",
+   "slug": "nerissa_ravencroft",
+   "aliases": null,
+   "one_line_persona": "寛容で情が厚く、ホロライブのファンとして同僚へ積極的に近づく。",
+   "speech": "歌うような柔らかな声と『darlings』という呼び掛け。",
+   "relationships": "キアラ・ファウナを強く推し、JPではマリンを敬愛。",
+   "self_reference": "あたし",
+   "source_urls": [
+    "https://seesaawiki.jp/hololivetv/d/Nerissa%20Ravencroft"
+   ],
+   "read_status": {
+    "collection": "raw_cached",
+    "machine": "structure_checked",
+    "model_full_read": "undocumented"
+   },
+   "card_path": "people/nerissa_ravencroft/card.md",
+   "readings": [
+    "ネリッサ・レイヴンクロフト"
+   ],
+   "handles": [
+    "@nerissa_en"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "Shiori Novella",
+   "region": "EN",
+   "generation": "advent",
+   "slug": "shiori_novella",
+   "aliases": null,
+   "one_line_persona": "知識・創作への興味が強く、落ち着いてAdventを見守りつつ、時には自ら騒ぐ。",
+   "speech": "冷静で知的な語り口に、本人が面白がる奇妙な知識やいたずらを織り込む。",
+   "relationships": "ビジューと遊び、ネリッサやFUWAMOCOと濃い同期交流がある。",
+   "self_reference": null,
+   "source_urls": [
+    "https://seesaawiki.jp/hololivetv/d/Shiori%20Novella"
+   ],
+   "read_status": {
+    "collection": "raw_cached",
+    "machine": "structure_checked",
+    "model_full_read": "undocumented"
+   },
+   "card_path": "people/shiori_novella/card.md",
+   "readings": [
+    "シオリ・ノヴェラ"
+   ],
+   "handles": [
+    "@shiorinovella"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "Ceres Fauna",
+   "region": "EN",
+   "generation": "council",
+   "slug": "ceres_fauna",
+   "aliases": null,
+   "one_line_persona": "親しみやすい面倒見のよさと勝負への熱さを併せ持つ。",
+   "speech": "声量を抑えた丁寧で柔らかい語り。",
+   "relationships": "Councilでの保護者的な位置、ムメイとのゲーム内の応酬。",
+   "self_reference": null,
+   "source_urls": [
+    "https://seesaawiki.jp/hololivetv/d/Ceres%20Fauna"
+   ],
+   "read_status": {
+    "collection": "raw_cached",
+    "machine": "structure_checked",
+    "model_full_read": "undocumented"
+   },
+   "card_path": "people/ceres_fauna/card.md",
+   "readings": [
+    "セレス・ファウナ"
+   ],
+   "handles": [
+    "@ceresfauna"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 「卒業生」欄に掲載（元EN -Promise-）"
+  },
+  {
+   "name": "Hakos Baelz",
+   "region": "EN",
+   "generation": "council",
+   "slug": "hakos_baelz",
+   "aliases": null,
+   "one_line_persona": "いたずらは計画的で一線を見極める。",
+   "speech": "勢いのある英語と日本語の掛け合い。",
+   "relationships": "IRySとの夫婦・離婚ごっこ、Council同期の取りまとめ、スバルへの憧れ。",
+   "self_reference": "ボク",
+   "source_urls": [
+    "https://seesaawiki.jp/hololivetv/d/Hakos%20Baelz"
+   ],
+   "read_status": {
+    "collection": "raw_cached",
+    "machine": "structure_checked",
+    "model_full_read": "undocumented"
+   },
+   "card_path": "people/hakos_baelz/card.md",
+   "readings": [
+    "ハコス・ベールズ"
+   ],
+   "handles": [
+    "@hakosbaelz",
+    "@iamhakosbaelz"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "Nanashi Mumei",
+   "region": "EN",
+   "generation": "council",
+   "slug": "nanashi_mumei",
+   "aliases": null,
+   "one_line_persona": "絵が得意で忘れっぽく、思いもよらない行動で周囲を驚かせる。",
+   "speech": "穏やかで短い挨拶に、唐突な天然発言や鋭い煽りが混じる。",
+   "relationships": "イナところねに憧れ、Councilの同期と遠慮ないやり取りをする。",
+   "self_reference": "Mumei",
+   "source_urls": [
+    "https://seesaawiki.jp/hololivetv/d/Nanashi%20Mumei"
+   ],
+   "read_status": {
+    "collection": "raw_cached",
+    "machine": "structure_checked",
+    "model_full_read": "undocumented"
+   },
+   "card_path": "people/nanashi_mumei/card.md",
+   "readings": [
+    "七詩ムメイ"
+   ],
+   "handles": [
+    "@nanashimumei_en"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 「卒業生」欄に掲載（元EN -Promise-）"
+  },
+  {
+   "name": "Ouro Kronii",
+   "region": "EN",
+   "generation": "council",
+   "slug": "ouro_kronii",
+   "aliases": null,
+   "one_line_persona": "真面目な面と天然の失敗が共存し、仲間からよくからかわれる。",
+   "speech": "低くゆったりした声で冷静さを装い、笑いが入ると止まりにくい。",
+   "relationships": "Councilの同期ムメイ・ファウナとの掛け合いが多い。",
+   "self_reference": null,
+   "source_urls": [
+    "https://seesaawiki.jp/hololivetv/d/Ouro%20Kronii"
+   ],
+   "read_status": {
+    "collection": "raw_cached",
+    "machine": "structure_checked",
+    "model_full_read": "undocumented"
+   },
+   "card_path": "people/ouro_kronii/card.md",
+   "readings": [
+    "オーロ・クロニー"
+   ],
+   "handles": [
+    "@ourokronii"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "Tsukumo Sana",
+   "region": "EN",
+   "generation": "council",
+   "slug": "tsukumo_sana",
+   "aliases": null,
+   "one_line_persona": "天文と絵を愛し、仲間やファンの笑顔を大切にする創作者。",
+   "speech": "宇宙・パン・大きさの比喩を交え、ゆったりおおらかな語り。",
+   "relationships": "イナとは以前から親しい絵描き仲間。",
+   "self_reference": null,
+   "source_urls": [
+    "https://seesaawiki.jp/hololivetv/d/Tsukumo%20Sana"
+   ],
+   "read_status": {
+    "collection": "raw_cached",
+    "machine": "structure_checked",
+    "model_full_read": "undocumented"
+   },
+   "card_path": "people/tsukumo_sana/card.md",
+   "readings": [
+    "九十九佐命"
+   ],
+   "handles": [
+    "@tsukumosana"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 「卒業生」欄に掲載（元EN -Council-）"
+  },
+  {
+   "name": "IRyS",
+   "region": "EN",
+   "generation": "hope",
+   "slug": "irys",
+   "aliases": null,
+   "one_line_persona": "歌唱に打ち込み、そそっかしい場面もある。",
+   "speech": "英語と流暢な日本語を行き来し、軽快な掛け合いと歌の声色を使い分ける。",
+   "relationships": "ベールズとの親密な夫婦・離婚ごっこの掛け合い。",
+   "self_reference": "わたし",
+   "source_urls": [
+    "https://seesaawiki.jp/hololivetv/d/IRyS"
+   ],
+   "read_status": {
+    "collection": "raw_cached",
+    "machine": "structure_checked",
+    "model_full_read": "undocumented"
+   },
+   "card_path": "people/irys/card.md",
+   "readings": [
+    "アイリス"
+   ],
+   "handles": [
+    "@irys_en"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "Cecilia Immergreen",
+   "region": "EN",
+   "generation": "justice",
+   "slug": "cecilia_immergreen",
+   "aliases": null,
+   "one_line_persona": "知的好奇心が強く、知らない相手にも臆せず話しかける。",
+   "speech": "早口で遠慮ないツッコミ。",
+   "relationships": "ジジとのCCGGが中心。",
+   "self_reference": null,
+   "source_urls": [
+    "https://seesaawiki.jp/hololivetv/d/Cecilia%20Immergreen"
+   ],
+   "read_status": {
+    "collection": "raw_cached",
+    "machine": "structure_checked",
+    "model_full_read": "undocumented"
+   },
+   "card_path": "people/cecilia_immergreen/card.md",
+   "readings": [
+    "セシリア・イマーグリーン"
+   ],
+   "handles": [
+    "@ceciliaimgreen"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "Elizabeth Rose Bloodflame",
+   "region": "EN",
+   "generation": "justice",
+   "slug": "elizabeth_rose_bloodflame",
+   "aliases": null,
+   "one_line_persona": "歌と声帯模写に秀で、Justiceのリーダーとしてふざける仲間をまとめる。",
+   "speech": "英国風の発音と演劇的な高笑い。",
+   "relationships": "ジジの暴走をたしなめ、Justiceのほかの三人に目を配る。",
+   "self_reference": null,
+   "source_urls": [
+    "https://seesaawiki.jp/hololivetv/d/Elizabeth%20Rose%20Bloodflame"
+   ],
+   "read_status": {
+    "collection": "raw_cached",
+    "machine": "structure_checked",
+    "model_full_read": "undocumented"
+   },
+   "card_path": "people/elizabeth_rose_bloodflame/card.md",
+   "readings": [
+    "エリザベス・ローズ・ブラッドフレイム"
+   ],
+   "handles": [
+    "@ERBloodflame"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "Gigi Murin",
+   "region": "EN",
+   "generation": "justice",
+   "slug": "gigi_murin",
+   "aliases": null,
+   "one_line_persona": "いたずら好きで即興の奇抜な行動が多いが、お化け屋敷やホラーに怯える。",
+   "speech": "元気な声で『YIPPEE』などを飛ばし、仲間との掛け合いをかき回す。",
+   "relationships": "セシリアとCCGGとして頻繁に協働。",
+   "self_reference": null,
+   "source_urls": [
+    "https://seesaawiki.jp/hololivetv/d/Gigi%20Murin"
+   ],
+   "read_status": {
+    "collection": "raw_cached",
+    "machine": "structure_checked",
+    "model_full_read": "undocumented"
+   },
+   "card_path": "people/gigi_murin/card.md",
+   "readings": [
+    "ジジ・ムリン"
+   ],
+   "handles": [
+    "@gigimurin"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "Raora Panthera",
+   "region": "EN",
+   "generation": "justice",
+   "slug": "raora_panthera",
+   "aliases": null,
+   "one_line_persona": "絵が得意で穏やか。",
+   "speech": "柔らかなハスキー声。",
+   "relationships": "ネリッサとカリオペを好み、Justiceの同期を落ち着いて見守る。",
+   "self_reference": null,
+   "source_urls": [
+    "https://seesaawiki.jp/hololivetv/d/Raora%20Panthera"
+   ],
+   "read_status": {
+    "collection": "raw_cached",
+    "machine": "structure_checked",
+    "model_full_read": "undocumented"
+   },
+   "card_path": "people/raora_panthera/card.md",
+   "readings": [
+    "ラオーラ・パンテーラ"
+   ],
+   "handles": [
+    "@raorapanthera"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "Gawr Gura",
+   "region": "EN",
+   "generation": "myth",
+   "slug": "gawr_gura",
+   "aliases": null,
+   "one_line_persona": "素早い機知といたずらっぽさがある一方、人見知りで親しい相手に慎重。",
+   "speech": "短く機転の利いたジョークとサメらしい奔放な掛け合い。",
+   "relationships": "シオンと翻訳を介して交流し、互いの配信や記念日に言葉を交わしてきた。",
+   "self_reference": null,
+   "source_urls": [
+    "https://seesaawiki.jp/hololivetv/d/Gawr%20Gura"
+   ],
+   "read_status": {
+    "collection": "raw_cached",
+    "machine": "structure_checked",
+    "model_full_read": "undocumented"
+   },
+   "card_path": "people/gawr_gura/card.md",
+   "readings": [
+    "がうる・ぐら"
+   ],
+   "handles": [
+    "@gawrgura"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 「卒業生」欄に掲載（元EN -Myth-）"
+  },
+  {
+   "name": "Mori Calliope",
+   "region": "EN",
+   "generation": "myth",
+   "slug": "mori_calliope",
+   "aliases": null,
+   "one_line_persona": "仕事と音楽に粘り強く、言葉の強さの奥に人情と気遣いがある。",
+   "speech": "英語のミーム・スラングとラッパーらしい歯切れのよい言葉。",
+   "relationships": "キアラとのTAKAMORIは互いをからかい支えるコンビ。",
+   "self_reference": "森, あたし",
+   "source_urls": [
+    "https://seesaawiki.jp/hololivetv/d/Mori%20Calliope"
+   ],
+   "read_status": {
+    "collection": "raw_cached",
+    "machine": "structure_checked",
+    "model_full_read": "undocumented"
+   },
+   "card_path": "people/mori_calliope/card.md",
+   "readings": [
+    "森カリオペ"
+   ],
+   "handles": [
+    "@moricalliope",
+    "@moricalliope_jp",
+    "@calliope_info"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "Ninomae Ina'nis",
+   "region": "EN",
+   "generation": "myth",
+   "slug": "ninomae_inanis",
+   "aliases": null,
+   "one_line_persona": "自ら声をかけるのは控えめ。",
+   "speech": "落ち着いた柔らかな声と短いダジャレ。",
+   "relationships": "佐命とはデビュー前からの親しい絵描き仲間。",
+   "self_reference": null,
+   "source_urls": [
+    "https://seesaawiki.jp/hololivetv/d/Ninomae%20Ina%27nis"
+   ],
+   "read_status": {
+    "collection": "raw_cached",
+    "machine": "structure_checked",
+    "model_full_read": "undocumented"
+   },
+   "card_path": "people/ninomae_inanis/card.md",
+   "readings": [
+    "一伊那尓栖"
+   ],
+   "handles": [
+    "@ninomaeinanis"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "Takanashi Kiara",
+   "region": "EN",
+   "generation": "myth",
+   "slug": "takanashi_kiara",
+   "aliases": null,
+   "one_line_persona": "社交的で行動力があり、喜びも悲しみも率直に出す。",
+   "speech": "ドイツ語・英語・日本語を使い分け、日本語では関西弁が混じる。",
+   "relationships": "カリオペとのTAKAMORI、JPとの橋渡し役、後輩にとっての頼れる先輩。",
+   "self_reference": "Kiara,私,ウチ,Kiwawa",
+   "source_urls": [
+    "https://seesaawiki.jp/hololivetv/d/Takanashi%20Kiara"
+   ],
+   "read_status": {
+    "collection": "raw_cached",
+    "machine": "structure_checked",
+    "model_full_read": "undocumented"
+   },
+   "card_path": "people/takanashi_kiara/card.md",
+   "readings": [
+    "小鳥遊キアラ"
+   ],
+   "handles": [
+    "@takanashikiara"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "Watson Amelia",
+   "region": "EN",
+   "generation": "myth",
+   "slug": "watson_amelia",
+   "aliases": null,
+   "one_line_persona": "基本は真面目で優しく、技術や企画に手を貸す一方、予想外の方向へ話を転がす。",
+   "speech": "探偵の設定を生かして調査や時間旅行を話題にし、好奇心と突飛な冗談が混ざる。",
+   "relationships": "Mythの同期を支える実務役。",
+   "self_reference": null,
+   "source_urls": [
+    "https://seesaawiki.jp/hololivetv/d/Watson%20Amelia"
+   ],
+   "read_status": {
+    "collection": "raw_cached",
+    "machine": "structure_checked",
+    "model_full_read": "undocumented"
+   },
+   "card_path": "people/watson_amelia/card.md",
+   "readings": [
+    "ワトソン・アメリア"
+   ],
+   "handles": [
+    "@watsonameliaEN"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載（【配信活動終了】の注記あり）"
+  },
+  {
+   "name": "Airani Iofifteen",
+   "region": "ID",
+   "generation": "id1",
+   "slug": "airani_iofifteen",
+   "aliases": null,
+   "one_line_persona": "落ち着いた包容力があり、グループではいたずらっぽい笑いも見せる。",
+   "speech": "複数言語を織り交ぜる。",
+   "relationships": "AREA15の発案者で、ムーナの相談役になり、ときのそらを姉のように慕う。",
+   "self_reference": "Yopi, よっぴー",
+   "source_urls": [
+    "https://seesaawiki.jp/hololivetv/d/Airani%20Iofifteen"
+   ],
+   "read_status": {
+    "collection": "raw_cached",
+    "machine": "structure_checked",
+    "model_full_read": "undocumented"
+   },
+   "card_path": "people/airani_iofifteen/card.md",
+   "readings": [
+    "アイラニ・イオフィフティーン"
+   ],
+   "handles": [
+    "@airaniiofifteen"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "Ayunda Risu",
+   "region": "ID",
+   "generation": "id1",
+   "slug": "ayunda_risu",
+   "aliases": null,
+   "one_line_persona": "同期へのいたずらを楽しむ一方、問題のあるコメントには率直に応じる。",
+   "speech": "高めのリス声と、低く大人びたアユンダの声を使い分ける。",
+   "relationships": "AREA15の同期イオフィ・ムーナとの結びつきが深い。",
+   "self_reference": null,
+   "source_urls": [
+    "https://seesaawiki.jp/hololivetv/d/Ayunda%20Risu"
+   ],
+   "read_status": {
+    "collection": "raw_cached",
+    "machine": "structure_checked",
+    "model_full_read": "undocumented"
+   },
+   "card_path": "people/ayunda_risu/card.md",
+   "readings": [
+    "アユンダ・リス"
+   ],
+   "handles": [
+    "@ayunda_risu"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "Moona Hoshinova",
+   "region": "ID",
+   "generation": "id1",
+   "slug": "moona_hoshinova",
+   "aliases": null,
+   "one_line_persona": "人見知りの面と、努力を積み重ねて大きな舞台を目指す面を持つ。",
+   "speech": "落ち着いた歌声に加え、ホシノヴァというお姉さん声の演じ分けがある。",
+   "relationships": "ぺこらと強い敬愛と信頼を築き、IDの後輩を助ける側にも回る。",
+   "self_reference": null,
+   "source_urls": [
+    "https://seesaawiki.jp/hololivetv/d/Moona%20Hoshinova"
+   ],
+   "read_status": {
+    "collection": "raw_cached",
+    "machine": "structure_checked",
+    "model_full_read": "undocumented"
+   },
+   "card_path": "people/moona_hoshinova/card.md",
+   "readings": [
+    "ムーナ・ホシノヴァ"
+   ],
+   "handles": [
+    "@moonahoshinova"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "Anya Melfissa",
+   "region": "ID",
+   "generation": "id2",
+   "slug": "anya_melfissa",
+   "aliases": null,
+   "one_line_persona": "率直で、関心のある話題には熱が入り、それ以外では静かに距離を置く。",
+   "speech": "日本語を自然なテンポで使い、鋭く短いツッコミやネット語彙が出る。",
+   "relationships": "ID・EN・JPの会話をつなぐ通訳役。",
+   "self_reference": "私(わたし・わたくし)、俺",
+   "source_urls": [
+    "https://seesaawiki.jp/hololivetv/d/Anya%20Melfissa"
+   ],
+   "read_status": {
+    "collection": "raw_cached",
+    "machine": "structure_checked",
+    "model_full_read": "undocumented"
+   },
+   "card_path": "people/anya_melfissa/card.md",
+   "readings": [
+    "アーニャ・メルフィッサ"
+   ],
+   "handles": [
+    "@anyamelfissa"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "Kureiji Ollie",
+   "region": "ID",
+   "generation": "id2",
+   "slug": "kureiji_ollie",
+   "aliases": null,
+   "one_line_persona": "にぎやかな外交役であり、体調や学校生活には真剣に注意する面倒見のよい先輩でもある。",
+   "speech": "インドネシア語・英語・日本語を交える高速のおしゃべりが持ち味。",
+   "relationships": "先輩への愛情表現が大きく、こぼをデビュー前から励まし、生活面でも世話してきた。",
+   "self_reference": null,
+   "source_urls": [
+    "https://seesaawiki.jp/hololivetv/d/Kureiji%20Ollie"
+   ],
+   "read_status": {
+    "collection": "raw_cached",
+    "machine": "structure_checked",
+    "model_full_read": "undocumented"
+   },
+   "card_path": "people/kureiji_ollie/card.md",
+   "readings": [
+    "クレイジー・オリー"
+   ],
+   "handles": [
+    "@kureijiollie"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "Pavolia Reine",
+   "region": "ID",
+   "generation": "id2",
+   "slug": "pavolia_reine",
+   "aliases": null,
+   "one_line_persona": "段取りと周囲への気配りが得意。",
+   "speech": "日本語・英語・インドネシア語を使い、上品な口調で進行する。",
+   "relationships": "Holotoriに所属し、マリンやキアラと親しく、ENを交えた語学企画にも積極的。",
+   "self_reference": null,
+   "source_urls": [
+    "https://seesaawiki.jp/hololivetv/d/Pavolia%20Reine"
+   ],
+   "read_status": {
+    "collection": "raw_cached",
+    "machine": "structure_checked",
+    "model_full_read": "undocumented"
+   },
+   "card_path": "people/pavolia_reine/card.md",
+   "readings": [
+    "パヴォリア・レイネ"
+   ],
+   "handles": [
+    "@pavoliareine"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "Kaela Kovalskia",
+   "region": "ID",
+   "generation": "id3",
+   "slug": "kaela_kovalskia",
+   "aliases": null,
+   "one_line_persona": "粘り強くゲームを掘り下げ、頼まれた人には資材や作業を惜しまず提供する。",
+   "speech": "落ち着いた低い声とサイレント笑いが特徴。",
+   "relationships": "みこやわため、クロニーを好み、ぺこら・みこなどをMinecraftで支えた。",
+   "self_reference": null,
+   "source_urls": [
+    "https://seesaawiki.jp/hololivetv/d/Kaela%20Kovalskia"
+   ],
+   "read_status": {
+    "collection": "raw_cached",
+    "machine": "structure_checked",
+    "model_full_read": "undocumented"
+   },
+   "card_path": "people/kaela_kovalskia/card.md",
+   "readings": [
+    "カエラ・コヴァルスキア"
+   ],
+   "handles": [
+    "@kaelakovalskia"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "Kobo Kanaeru",
+   "region": "ID",
+   "generation": "id3",
+   "slug": "kobo_kanaeru",
+   "aliases": null,
+   "one_line_persona": "人懐こく自由で、親しくなった相手には遠慮なく甘える。",
+   "speech": "声が大きく、甘えや反抗をすばやく行き来する。",
+   "relationships": "オリーにデビュー前から支えられ、カリオペとキアラの「親」ごっこにも乗る。",
+   "self_reference": "kobo",
+   "source_urls": [
+    "https://seesaawiki.jp/hololivetv/d/Kobo%20Kanaeru"
+   ],
+   "read_status": {
+    "collection": "raw_cached",
+    "machine": "structure_checked",
+    "model_full_read": "undocumented"
+   },
+   "card_path": "people/kobo_kanaeru/card.md",
+   "readings": [
+    "こぼ・かなえる"
+   ],
+   "handles": [
+    "@kobokanaeru"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "Vestia Zeta",
+   "region": "ID",
+   "generation": "id3",
+   "slug": "vestia_zeta",
+   "aliases": null,
+   "one_line_persona": "情報員を演じるが予定外のことではうっかりもする。",
+   "speech": "柔らかいソプラノ声と鋭い冗談の落差があり、日本語では舌足らずな響きが出る。",
+   "relationships": "同期こぼといたずらで気が合い、イナニス・ムメイなどENとも交流がある。",
+   "self_reference": null,
+   "source_urls": [
+    "https://seesaawiki.jp/hololivetv/d/Vestia%20Zeta"
+   ],
+   "read_status": {
+    "collection": "raw_cached",
+    "machine": "structure_checked",
+    "model_full_read": "undocumented"
+   },
+   "card_path": "people/vestia_zeta/card.md",
+   "readings": [
+    "ベスティア・ゼータ"
+   ],
+   "handles": [
+    "@vestiazeta"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "AZKi",
+   "region": "JP",
+   "generation": "0期生",
+   "slug": "azki",
+   "aliases": [
+    "あずき",
+    "AZKi"
+   ],
+   "one_line_persona": "おっとりゆるふわ系、物腰も柔らかく正しい意味で「清楚」と目されるような性格をしており、リスナーやメンバー曰く「最後の砦」。",
+   "speech": "ほいで",
+   "relationships": null,
+   "self_reference": "私、AZKi、あずきちさん",
+   "source_urls": [
+    "https://seesaawiki.jp/hololivetv/d/AZKi"
+   ],
+   "read_status": {
+    "collection": "structured_cached",
+    "machine": "independently_checked_from_compacted_records",
+    "model_full_read": "undocumented"
+   },
+   "card_path": "people/azki/card.md",
+   "readings": [
+    "あずき"
+   ],
+   "handles": [
+    "@AZKi_VDiVA"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "さくらみこ",
+   "region": "JP",
+   "generation": "0期生",
+   "slug": "sakura_miko",
+   "aliases": [
+    "みこ",
+    "みこち",
+    "さくらみこ"
+   ],
+   "one_line_persona": "ポンコツでパズルゲームや謎解きなどが苦手。",
+   "speech": "○○かーも？",
+   "relationships": null,
+   "self_reference": "みこ、みこちゃん、私、おれ、(ちゃっぴぃ、ちゃーちゃん)",
+   "source_urls": [
+    "https://seesaawiki.jp/hololivetv/d/%a4%b5%a4%af%a4%e9%a4%df%a4%b3",
+    "https://seesaawiki.jp/hololivetv/d/%A4%B5%A4%AF%A4%E9%A4%DF%A4%B3"
+   ],
+   "read_status": {
+    "collection": "structured_cached",
+    "machine": "independently_checked_from_compacted_records",
+    "model_full_read": "undocumented"
+   },
+   "card_path": "people/sakura_miko/card.md",
+   "readings": [],
+   "handles": [
+    "@sakuramiko35",
+    "@mikochisub"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "ときのそら",
+   "region": "JP",
+   "generation": "0期生",
+   "slug": "tokino_sora",
+   "aliases": [
+    "そら",
+    "そらちゃん",
+    "ときのそら"
+   ],
+   "one_line_persona": "とてもほんわかとしており、天然なところがある。",
+   "speech": "ア゛ッ",
+   "relationships": null,
+   "self_reference": "わたし、そらち、ぬんちゃん(文章表記のみ)",
+   "source_urls": [
+    "https://seesaawiki.jp/hololivetv/d/%a4%c8%a4%ad%a4%ce%a4%bd%a4%e9"
+   ],
+   "read_status": {
+    "collection": "structured_cached",
+    "machine": "independently_checked_from_compacted_records",
+    "model_full_read": "undocumented"
+   },
+   "card_path": "people/tokino_sora/card.md",
+   "readings": [],
+   "handles": [
+    "@tokino_sora"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "ロボ子さん",
+   "region": "JP",
+   "generation": "0期生",
+   "slug": "robocosan",
+   "aliases": [
+    "ロボ子",
+    "ロボちゃん",
+    "ロボ子さん"
+   ],
+   "one_line_persona": "kuromaru9氏が開発した自称・超高性能ロボット。",
+   "speech": "いいよぉ〜",
+   "relationships": null,
+   "self_reference": "ボク",
+   "source_urls": [
+    "https://seesaawiki.jp/hololivetv/d/%a5%ed%a5%dc%bb%d2%a4%b5%a4%f3"
+   ],
+   "read_status": {
+    "collection": "structured_cached",
+    "machine": "independently_checked_from_compacted_records",
+    "model_full_read": "undocumented"
+   },
+   "card_path": "people/robocosan/card.md",
+   "readings": [
+    "ろぼこさん"
+   ],
+   "handles": [
+    "@robocosan",
+    "@maybe_robochan"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "星街すいせい",
+   "region": "JP",
+   "generation": "0期生",
+   "slug": "hoshimachi_suisei",
+   "aliases": [
+    "すいせい",
+    "すいちゃん",
+    "星街すいせい"
+   ],
+   "one_line_persona": "2018年3月22日に個人配信者としてVtuberデビュー。",
+   "speech": "○○話をしたと思うんですけど",
+   "relationships": null,
+   "self_reference": "すいせい(初期)、私、あたし、すいちゃん",
+   "source_urls": [
+    "https://seesaawiki.jp/hololivetv/d/%c0%b1%b3%b9%a4%b9%a4%a4%a4%bb%a4%a4"
+   ],
+   "read_status": {
+    "collection": "structured_cached",
+    "machine": "independently_checked_from_compacted_records",
+    "model_full_read": "undocumented"
+   },
+   "card_path": "people/hoshimachi_suisei/card.md",
+   "readings": [
+    "ほしまちすいせい"
+   ],
+   "handles": [
+    "@suisei_hosimati",
+    "@suisei_submati"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "アキ・ローゼンタール",
+   "region": "JP",
+   "generation": "1期生",
+   "slug": "aki_rosenthal",
+   "aliases": [
+    "アキ",
+    "アキちゃん",
+    "アキ・ローゼンタール"
+   ],
+   "one_line_persona": "ゲームや雑談、料理・飲酒配信などや、ASMR配信を得意としている。",
+   "speech": "一旦",
+   "relationships": null,
+   "self_reference": "アキロゼ、アキロゼちゃん、私、ムキロゼ",
+   "source_urls": [
+    "https://seesaawiki.jp/hololivetv/d/%a5%a2%a5%ad%a1%a6%a5%ed%a1%bc%a5%bc%a5%f3%a5%bf%a1%bc%a5%eb"
+   ],
+   "read_status": {
+    "collection": "structured_cached",
+    "machine": "independently_checked_from_compacted_records",
+    "model_full_read": "undocumented"
+   },
+   "card_path": "people/aki_rosenthal/card.md",
+   "readings": [],
+   "handles": [
+    "@akirosenthal",
+    "@akirose_sub"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "人見クリス",
+   "region": "JP",
+   "generation": "1期生",
+   "slug": "hitomi_chris",
+   "aliases": null,
+   "one_line_persona": null,
+   "speech": null,
+   "relationships": null,
+   "self_reference": null,
+   "source_urls": [
+    "https://seesaawiki.jp/hololivetv/d/1%b4%fc%c0%b8"
+   ],
+   "read_status": {
+    "collection": "unpublished_person_article",
+    "machine": "not_acquired",
+    "model_full_read": "undocumented"
+   },
+   "card_path": "people/hitomi_chris/card.md",
+   "readings": [],
+   "handles": [],
+   "wiki_status": "wikiトップ（2026-09-27取得）: メンバー一覧に未掲載"
+  },
+  {
+   "name": "夏色まつり",
+   "region": "JP",
+   "generation": "1期生",
+   "slug": "natsuiro_matsuri",
+   "aliases": [
+    "まつり",
+    "まつりちゃん",
+    "夏色まつり"
+   ],
+   "one_line_persona": "名前の通りお祭り騒ぎのような明るさと元気さが売りだが、そこからにじみ出るおぞましい性癖が度々コラボ相手およびファンを困惑させることが多い。",
+   "speech": "〜屋さん",
+   "relationships": null,
+   "self_reference": "まつり、おれ(たまに)、ぼく(動揺時)",
+   "source_urls": [
+    "https://seesaawiki.jp/hololivetv/d/%b2%c6%bf%a7%a4%de%a4%c4%a4%ea"
+   ],
+   "read_status": {
+    "collection": "structured_cached",
+    "machine": "independently_checked_from_compacted_records",
+    "model_full_read": "undocumented"
+   },
+   "card_path": "people/natsuiro_matsuri/card.md",
+   "readings": [
+    "なついろまつり"
+   ],
+   "handles": [
+    "@natsuiromatsuri",
+    "@7216_2nd"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "夜空メル",
+   "region": "JP",
+   "generation": "1期生",
+   "slug": "yozora_mel",
+   "aliases": [
+    "メル",
+    "メルちゃん",
+    "夜空メル"
+   ],
+   "one_line_persona": "よくいえば個性派、ストレートにいえばそれぞれ別ベクトルにやべーやつ揃いな一期生の中ではかなりの良識人であり、代わりによく振り回されている。",
+   "speech": "かぷかぷ",
+   "relationships": null,
+   "self_reference": "メル",
+   "source_urls": [
+    "https://seesaawiki.jp/hololivetv/d/%cc%eb%b6%f5%a5%e1%a5%eb"
+   ],
+   "read_status": {
+    "collection": "structured_cached",
+    "machine": "independently_checked_from_compacted_records",
+    "model_full_read": "undocumented"
+   },
+   "card_path": "people/yozora_mel/card.md",
+   "readings": [
+    "よぞらめる"
+   ],
+   "handles": [
+    "@yozoramel",
+    "@mel_kapu"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 「活動終了／卒業生メンバー」欄に掲載（元1期生）"
+  },
+  {
+   "name": "白上フブキ",
+   "region": "JP",
+   "generation": "1期生",
+   "slug": "shirakami_fubuki",
+   "aliases": [
+    "フブキ",
+    "friend",
+    "白上フブキ"
+   ],
+   "one_line_persona": "ホロライブ古参の1期生として立ち回るが、先輩後輩の壁は気にせずフレンドリーに絡んでいく。",
+   "speech": "あああああああああああ",
+   "relationships": null,
+   "self_reference": "白上、私",
+   "source_urls": [
+    "https://seesaawiki.jp/hololivetv/d/%c7%f2%be%e5%a5%d5%a5%d6%a5%ad"
+   ],
+   "read_status": {
+    "collection": "structured_cached",
+    "machine": "independently_checked_from_compacted_records",
+    "model_full_read": "undocumented"
+   },
+   "card_path": "people/shirakami_fubuki/card.md",
+   "readings": [
+    "しらかみふぶき"
+   ],
+   "handles": [
+    "@shirakamifubuki",
+    "@fubuchandayo"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "赤井はあと",
+   "region": "JP",
+   "generation": "1期生",
+   "slug": "akai_haato",
+   "aliases": [
+    "はあと",
+    "はあちゃま",
+    "赤井はあと"
+   ],
+   "one_line_persona": "気まぐれでわがまま、面倒くさがりの上にせっかちで飽きっぽく天邪鬼。",
+   "speech": "OK!",
+   "relationships": null,
+   "self_reference": "私、はあちゃま",
+   "source_urls": [
+    "https://seesaawiki.jp/hololivetv/d/%c0%d6%b0%e6%a4%cf%a4%a2%a4%c8"
+   ],
+   "read_status": {
+    "collection": "structured_cached",
+    "machine": "independently_checked_from_compacted_records",
+    "model_full_read": "undocumented"
+   },
+   "card_path": "people/akai_haato/card.md",
+   "readings": [
+    "あかいはあと"
+   ],
+   "handles": [
+    "@akaihaato",
+    "@HAACHAMAsub",
+    "@akaihaatosub"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "大空スバル",
+   "region": "JP",
+   "generation": "2期生",
+   "slug": "oozora_subaru",
+   "aliases": [
+    "スバル",
+    "しゅば",
+    "大空スバル"
+   ],
+   "one_line_persona": "非常に明るく物怖じしない性格をしている。",
+   "speech": "OMAEEEEE",
+   "relationships": null,
+   "self_reference": null,
+   "source_urls": [
+    "https://seesaawiki.jp/hololivetv/d/%c2%e7%b6%f5%a5%b9%a5%d0%a5%eb"
+   ],
+   "read_status": {
+    "collection": "structured_cached",
+    "machine": "independently_checked_from_compacted_records",
+    "model_full_read": "undocumented"
+   },
+   "card_path": "people/oozora_subaru/card.md",
+   "readings": [
+    "おおぞらすばる"
+   ],
+   "handles": [
+    "@oozorasubaru"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "湊あくあ",
+   "region": "JP",
+   "generation": "2期生",
+   "slug": "minato_aqua",
+   "aliases": [
+    "あくあ",
+    "あくたん",
+    "湊あくあ"
+   ],
+   "one_line_persona": "ホロライブ二期生配信トップバッターにして自称清楚（？）なバーチャルマリンメイド。",
+   "speech": "バカがよぉ！！",
+   "relationships": null,
+   "self_reference": "私、あてぃし",
+   "source_urls": [
+    "https://seesaawiki.jp/hololivetv/d/%cc%ab%a4%a2%a4%af%a4%a2"
+   ],
+   "read_status": {
+    "collection": "structured_cached",
+    "machine": "independently_checked_from_compacted_records",
+    "model_full_read": "undocumented"
+   },
+   "card_path": "people/minato_aqua/card.md",
+   "readings": [
+    "みなとあくあ"
+   ],
+   "handles": [
+    "@minatoaqua"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 「卒業生」欄に掲載（元2期生）"
+  },
+  {
+   "name": "癒月ちょこ",
+   "region": "JP",
+   "generation": "2期生",
+   "slug": "yuzuki_choco",
+   "aliases": [
+    "ちょこ",
+    "ちょこ先生",
+    "癒月ちょこ"
+   ],
+   "one_line_persona": "大人っぽい見た目通り大人の余裕を見せつける所がある一方で駄々をこねたり、負けず嫌いな一面があるなど子供っぽいところもある……のだが、最近ではゲーム内でわからないことを教えてもらった時、お目当てのアイテムや恐竜を見つけた時、美味しいものを食べた時など子供らしいリアクションが目立つようになり、｢幼児｣｢エロい幼女｣｢(コラボした際に…",
+   "speech": "あ〜ね",
+   "relationships": null,
+   "self_reference": "私、ちょこ、癒月、わたくし、ちょこ先生",
+   "source_urls": [
+    "https://seesaawiki.jp/hololivetv/d/%cc%fe%b7%ee%a4%c1%a4%e7%a4%b3"
+   ],
+   "read_status": {
+    "collection": "structured_cached",
+    "machine": "independently_checked_from_compacted_records",
+    "model_full_read": "undocumented"
+   },
+   "card_path": "people/yuzuki_choco/card.md",
+   "readings": [
+    "ゆづきちょこ"
+   ],
+   "handles": [
+    "@yuzukichococh"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "百鬼あやめ",
+   "region": "JP",
+   "generation": "2期生",
+   "slug": "nakiri_ayame",
+   "aliases": [
+    "あやめ",
+    "おじゃ",
+    "百鬼あやめ"
+   ],
+   "one_line_persona": "いたずら好きなところがあり、仕掛けてみたりボケに乗っかることも多い。",
+   "speech": "余",
+   "relationships": null,
+   "self_reference": "余",
+   "source_urls": [
+    "https://seesaawiki.jp/hololivetv/d/%c9%b4%b5%b4%a4%a2%a4%e4%a4%e1"
+   ],
+   "read_status": {
+    "collection": "structured_cached",
+    "machine": "independently_checked_from_compacted_records",
+    "model_full_read": "undocumented"
+   },
+   "card_path": "people/nakiri_ayame/card.md",
+   "readings": [
+    "なきりあやめ"
+   ],
+   "handles": [
+    "@nakiriayame",
+    "@YODAYOsub"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "紫咲シオン",
+   "region": "JP",
+   "generation": "2期生",
+   "slug": "murasaki_shion",
+   "aliases": [
+    "シオン",
+    "しぃしぃ",
+    "紫咲シオン"
+   ],
+   "one_line_persona": "その見た目通り思ったことをすぐ口に出してしまったり、幼い言動をすることもままある。",
+   "speech": "あらま",
+   "relationships": null,
+   "self_reference": "シオン、あてぃし(稀)",
+   "source_urls": [
+    "https://seesaawiki.jp/hololivetv/d/%bb%e7%ba%e9%a5%b7%a5%aa%a5%f3",
+    "https://seesaawiki.jp/hololivetv/d/%BB%E7%BA%E9%A5%B7%A5%AA%A5%F3"
+   ],
+   "read_status": {
+    "collection": "structured_cached",
+    "machine": "independently_checked_from_compacted_records",
+    "model_full_read": "undocumented"
+   },
+   "card_path": "people/murasaki_shion/card.md",
+   "readings": [
+    "むらさきしおん"
+   ],
+   "handles": [
+    "@murasakishionch",
+    "@shionchan_o"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 「卒業生」欄に掲載（元2期生）"
+  },
+  {
+   "name": "不知火フレア",
+   "region": "JP",
+   "generation": "3期生",
+   "slug": "shiranui_flare",
+   "aliases": [
+    "フレア",
+    "エルフ",
+    "不知火フレア"
+   ],
+   "one_line_persona": "性格は気配り上手で優しく世話焼き。",
+   "speech": null,
+   "relationships": null,
+   "self_reference": "私、あたし、フレア",
+   "source_urls": [
+    "https://seesaawiki.jp/hololivetv/d/%c9%d4%c3%ce%b2%d0%a5%d5%a5%ec%a5%a2"
+   ],
+   "read_status": {
+    "collection": "structured_cached",
+    "machine": "independently_checked_from_compacted_records",
+    "model_full_read": "undocumented"
+   },
+   "card_path": "people/shiranui_flare/card.md",
+   "readings": [
+    "しらぬいふれあ"
+   ],
+   "handles": [
+    "@shiranuiflare",
+    "@fuu_tan_sub"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "兎田ぺこら",
+   "region": "JP",
+   "generation": "3期生",
+   "slug": "usada_pekora",
+   "aliases": [
+    "ぺこら",
+    "ぺこーら",
+    "兎田ぺこら"
+   ],
+   "one_line_persona": "大半の配信者の例にもれずデビュー当時と慣れてからのギャップがとても大きいことが、自身の1周年記念配信  の振り返りでも触れられている。",
+   "speech": "○○ぺこ〜",
+   "relationships": null,
+   "self_reference": "ぺこら、ぺこーら、ぺこちゃん、ぺっちゃん、私、僕、アタイ",
+   "source_urls": [
+    "https://seesaawiki.jp/hololivetv/d/%c5%c6%c5%c4%a4%da%a4%b3%a4%e9",
+    "https://seesaawiki.jp/hololivetv/d/%C5%C6%C5%C4%A4%DA%A4%B3%A4%E9"
+   ],
+   "read_status": {
+    "collection": "structured_cached",
+    "machine": "independently_checked_from_compacted_records",
+    "model_full_read": "undocumented"
+   },
+   "card_path": "people/usada_pekora/card.md",
+   "readings": [
+    "うさだぺこら"
+   ],
+   "handles": [
+    "@usadapekora",
+    "@uraakapeko"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "宝鐘マリン",
+   "region": "JP",
+   "generation": "3期生",
+   "slug": "houshou_marine",
+   "aliases": [
+    "マリン",
+    "船長",
+    "宝鐘マリン"
+   ],
+   "one_line_persona": "古の声優オタクであり、キッズステーションにかじりついてアニメを見てはEDで声優をチェックしていた。",
+   "speech": "○○くっぞ！",
+   "relationships": null,
+   "self_reference": "船長、マリン、私(わたし)、あたし、マリンめ（謙遜する時）、マリンちゃん",
+   "source_urls": [
+    "https://seesaawiki.jp/hololivetv/d/%ca%f5%be%e2%a5%de%a5%ea%a5%f3"
+   ],
+   "read_status": {
+    "collection": "structured_cached",
+    "machine": "independently_checked_from_compacted_records",
+    "model_full_read": "undocumented"
+   },
+   "card_path": "people/houshou_marine/card.md",
+   "readings": [],
+   "handles": [
+    "@houshoumarine"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "潤羽るしあ",
+   "region": "JP",
+   "generation": "3期生",
+   "slug": "uruha_rushia",
+   "aliases": null,
+   "one_line_persona": "魔界学校の見習いネクロマンサー。",
+   "speech": "こんるし〜、おつるし〜、アンデッドにしてやります",
+   "relationships": "兎田ぺこら: 3期生の先行組として付き合いがあり、互いに人見知りの時期を経た。",
+   "self_reference": "るしあ、る、私",
+   "source_urls": [
+    "https://seesaawiki.jp/hololivetv/d/%bd%e1%b1%a9%a4%eb%a4%b7%a4%a2"
+   ],
+   "read_status": {
+    "collection": "raw_cached",
+    "machine": "structure_checked",
+    "model_full_read": "undocumented"
+   },
+   "card_path": "people/uruha_rushia/card.md",
+   "readings": [
+    "うるはるしあ"
+   ],
+   "handles": [
+    "@uruharushia"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 「活動終了／卒業生メンバー」欄に掲載（元3期生）"
+  },
+  {
+   "name": "白銀ノエル",
+   "region": "JP",
+   "generation": "3期生",
+   "slug": "shirogane_noel",
+   "aliases": [
+    "ノエル",
+    "団長",
+    "白銀ノエル"
+   ],
+   "one_line_persona": "脳筋ゆるふわ女騎士というだけあって性格はかなりおっとりとしているが、ゲームでよくパニックに陥ると敵味方の区別なく攻撃するクセがある。",
+   "speech": "あ〜い",
+   "relationships": null,
+   "self_reference": "団長、ノエちゃん、だんちょ、わたし、俺、うち",
+   "source_urls": [
+    "https://seesaawiki.jp/hololivetv/d/%c7%f2%b6%e4%a5%ce%a5%a8%a5%eb"
+   ],
+   "read_status": {
+    "collection": "structured_cached",
+    "machine": "independently_checked_from_compacted_records",
+    "model_full_read": "undocumented"
+   },
+   "card_path": "people/shirogane_noel/card.md",
+   "readings": [
+    "しろがねのえる"
+   ],
+   "handles": [
+    "@shiroganenoel",
+    "@danchou_sub"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "天音かなた",
+   "region": "JP",
+   "generation": "4期生",
+   "slug": "amane_kanata",
+   "aliases": [
+    "かなた",
+    "かなたそ",
+    "天音かなた"
+   ],
+   "one_line_persona": "ドルオタを自称しており、2次元や3次元を問わず可愛い女の子が大好き。",
+   "speech": "おかしいだろうが",
+   "relationships": null,
+   "self_reference": "僕、かなたそ、天音(デビュー前)",
+   "source_urls": [
+    "https://seesaawiki.jp/hololivetv/d/%c5%b7%b2%bb%a4%ab%a4%ca%a4%bf",
+    "https://seesaawiki.jp/hololivetv/d/%C5%B7%B2%BB%A4%AB%A4%CA%A4%BF"
+   ],
+   "read_status": {
+    "collection": "structured_cached",
+    "machine": "independently_checked_from_compacted_records",
+    "model_full_read": "undocumented"
+   },
+   "card_path": "people/amane_kanata/card.md",
+   "readings": [
+    "あまねかなた"
+   ],
+   "handles": [
+    "@amanekanatach",
+    "@subtasochan"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 「卒業生」欄に掲載（元4期生）"
+  },
+  {
+   "name": "姫森ルーナ",
+   "region": "JP",
+   "generation": "4期生",
+   "slug": "himemori_luna",
+   "aliases": [
+    "ルーナ",
+    "姫",
+    "姫森ルーナ"
+   ],
+   "one_line_persona": "ふわふわとした外見や、「のら〜」「んなぁ〜」というゆるくて可愛い声にやられたリスナーが多くいるように、初期には可愛いボケキャラとしてデビューした。",
+   "speech": null,
+   "relationships": null,
+   "self_reference": "ルーナ、るなたん、んなたん、わたし(稀)",
+   "source_urls": [
+    "https://seesaawiki.jp/hololivetv/d/%c9%b1%bf%b9%a5%eb%a1%bc%a5%ca"
+   ],
+   "read_status": {
+    "collection": "structured_cached",
+    "machine": "independently_checked_from_compacted_records",
+    "model_full_read": "undocumented"
+   },
+   "card_path": "people/himemori_luna/card.md",
+   "readings": [
+    "ひめもりるーな"
+   ],
+   "handles": [
+    "@himemoriluna",
+    "@lunatan_nanora"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "常闇トワ",
+   "region": "JP",
+   "generation": "4期生",
+   "slug": "tokoyami_towa",
+   "aliases": [
+    "トワ",
+    "トワ様",
+    "常闇トワ"
+   ],
+   "one_line_persona": "つつみ隠さずに言いたいことはきちんという方である。",
+   "speech": "○○したっていい。",
+   "relationships": null,
+   "self_reference": "トワ、トワ様、トワしゃま、常闇",
+   "source_urls": [
+    "https://seesaawiki.jp/hololivetv/d/%be%ef%b0%c7%a5%c8%a5%ef"
+   ],
+   "read_status": {
+    "collection": "structured_cached",
+    "machine": "independently_checked_from_compacted_records",
+    "model_full_read": "undocumented"
+   },
+   "card_path": "people/tokoyami_towa/card.md",
+   "readings": [
+    "とこやみとわ"
+   ],
+   "handles": [
+    "@tokoyamitowa",
+    "@108_towasama"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "桐生ココ",
+   "region": "JP",
+   "generation": "4期生",
+   "slug": "kiryu_coco",
+   "aliases": null,
+   "one_line_persona": "英語が母語で日本語にも通じる龍。",
+   "speech": "こんドラゴン、おはようございました",
+   "relationships": "天音かなた: 気兼ねのない親友。",
+   "self_reference": "わたし、桐生ココ氏、会長",
+   "source_urls": [
+    "https://seesaawiki.jp/hololivetv/d/%b6%cd%c0%b8%a5%b3%a5%b3"
+   ],
+   "read_status": {
+    "collection": "raw_cached",
+    "machine": "structure_checked",
+    "model_full_read": "undocumented"
+   },
+   "card_path": "people/kiryu_coco/card.md",
+   "readings": [
+    "きりゅうここ"
+   ],
+   "handles": [
+    "@kiryucoco"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 「卒業生」欄に掲載（元4期生）"
+  },
+  {
+   "name": "角巻わため",
+   "region": "JP",
+   "generation": "4期生",
+   "slug": "tsunomaki_watame",
+   "aliases": [
+    "わため",
+    "わたたん",
+    "角巻わため"
+   ],
+   "one_line_persona": "声",
+   "speech": "○○ごぜぇます",
+   "relationships": null,
+   "self_reference": "わため、わためぇ、わたし",
+   "source_urls": [
+    "https://seesaawiki.jp/hololivetv/d/%b3%d1%b4%ac%a4%ef%a4%bf%a4%e1"
+   ],
+   "read_status": {
+    "collection": "structured_cached",
+    "machine": "independently_checked_from_compacted_records",
+    "model_full_read": "undocumented"
+   },
+   "card_path": "people/tsunomaki_watame/card.md",
+   "readings": [
+    "つのまきわため"
+   ],
+   "handles": [
+    "@tsunomakiwatame"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "尾丸ポルカ",
+   "region": "JP",
+   "generation": "5期生",
+   "slug": "omaru_polka",
+   "aliases": [
+    "ポルカ",
+    "ぽるさん",
+    "尾丸ポルカ"
+   ],
+   "one_line_persona": "エンターテイナーらしく司会進行と盛り上げ能力に長けている。",
+   "speech": "過呼吸",
+   "relationships": null,
+   "self_reference": "私、ポルカ、ぽっか、オレ、わい、わし",
+   "source_urls": [
+    "https://seesaawiki.jp/hololivetv/d/%c8%f8%b4%dd%a5%dd%a5%eb%a5%ab"
+   ],
+   "read_status": {
+    "collection": "structured_cached",
+    "machine": "independently_checked_from_compacted_records",
+    "model_full_read": "undocumented"
+   },
+   "card_path": "people/omaru_polka/card.md",
+   "readings": [
+    "おまるぽるか"
+   ],
+   "handles": [
+    "@omarupolka",
+    "@polkasub"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "桃鈴ねね",
+   "region": "JP",
+   "generation": "5期生",
+   "slug": "momosuzu_nene",
+   "aliases": [
+    "ねね",
+    "ねねち",
+    "桃鈴ねね"
+   ],
+   "one_line_persona": "彼女を一言で言い表した言葉が、学びを得た10歳男児【年中夏休み】*254*255（Discordの自己紹介文より）。",
+   "speech": "あぶない",
+   "relationships": null,
+   "self_reference": "ねね、ねねち、うち 、あたし、あてぃし、私、俺、僕、ぼきゅ、おいら、おら、わて、わてくし",
+   "source_urls": [
+    "https://seesaawiki.jp/hololivetv/d/%c5%ed%ce%eb%a4%cd%a4%cd"
+   ],
+   "read_status": {
+    "collection": "structured_cached",
+    "machine": "independently_checked_from_compacted_records",
+    "model_full_read": "undocumented"
+   },
+   "card_path": "people/momosuzu_nene/card.md",
+   "readings": [
+    "ももすずねね"
+   ],
+   "handles": [
+    "@momosuzunene",
+    "@_nenechidayo"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "獅白ぼたん",
+   "region": "JP",
+   "generation": "5期生",
+   "slug": "shishiro_botan",
+   "aliases": [
+    "ぼたん",
+    "獅白ぼたん"
+   ],
+   "one_line_persona": "ゆるそうな雰囲気だが、実際にはしっかりとした性格で丁寧に物事をこなす。",
+   "speech": "あたし",
+   "relationships": null,
+   "self_reference": "私、あたし、俺、ししろん",
+   "source_urls": [
+    "https://seesaawiki.jp/hololivetv/d/%bb%e2%c7%f2%a4%dc%a4%bf%a4%f3"
+   ],
+   "read_status": {
+    "collection": "structured_cached",
+    "machine": "independently_checked_from_compacted_records",
+    "model_full_read": "undocumented"
+   },
+   "card_path": "people/shishiro_botan/card.md",
+   "readings": [
+    "ししろぼたん"
+   ],
+   "handles": [
+    "@shishirobotan",
+    "@446_bo"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "雪花ラミィ",
+   "region": "JP",
+   "generation": "5期生",
+   "slug": "yukihana_lamy",
+   "aliases": [
+    "ラミィ",
+    "ラミィちゃん",
+    "雪花ラミィ"
+   ],
+   "one_line_persona": "よく通る明るい声が特徴で、ノリはとても良い。",
+   "speech": "※発音として (語尾上がり)",
+   "relationships": null,
+   "self_reference": "ラミィ、雪花ラミィ、らみ",
+   "source_urls": [
+    "https://seesaawiki.jp/hololivetv/d/%c0%e3%b2%d6%a5%e9%a5%df%a5%a3"
+   ],
+   "read_status": {
+    "collection": "structured_cached",
+    "machine": "independently_checked_from_compacted_records",
+    "model_full_read": "undocumented"
+   },
+   "card_path": "people/yukihana_lamy/card.md",
+   "readings": [
+    "ゆきはならみぃ"
+   ],
+   "handles": [
+    "@yukihanalamy",
+    "@YukihanaWamy"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "魔乃アロエ",
+   "region": "JP",
+   "generation": "5期生",
+   "slug": "mano_aloe",
+   "aliases": null,
+   "one_line_persona": "歌姫を目指す見習いサキュバス。",
+   "speech": "吾輩",
+   "relationships": "雪花ラミィ・桃鈴ねね・獅白ぼたん・尾丸ポルカ: 呼称一覧でラミィ、ねね、ししろん、ポルカ等を確認。",
+   "self_reference": "吾輩",
+   "source_urls": [
+    "https://seesaawiki.jp/hololivetv/d/%cb%e2%c7%b5%a5%a2%a5%ed%a5%a8"
+   ],
+   "read_status": {
+    "collection": "raw_cached",
+    "machine": "structure_checked",
+    "model_full_read": "undocumented"
+   },
+   "card_path": "people/mano_aloe/card.md",
+   "readings": [
+    "まのあろえ"
+   ],
+   "handles": [
+    "@manoaloe"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 「活動終了／卒業生メンバー」欄に掲載（元5期生）"
+  },
+  {
+   "name": "水宮枢",
+   "region": "JP",
+   "generation": "FLOW GLOW",
+   "slug": "mizumiya_su",
+   "aliases": [
+    "枢",
+    "すう",
+    "水宮枢"
+   ],
+   "one_line_persona": "マイペース",
+   "speech": "○○が○○で○○だよね",
+   "relationships": null,
+   "self_reference": "枢、すうちゃん、水宮、俺、私、あたし",
+   "source_urls": [
+    "https://seesaawiki.jp/hololivetv/d/%bf%e5%b5%dc%bf%f5"
+   ],
+   "read_status": {
+    "collection": "structured_cached",
+    "machine": "independently_checked_from_compacted_records",
+    "model_full_read": "undocumented"
+   },
+   "card_path": "people/mizumiya_su/card.md",
+   "readings": [
+    "みずみや すう"
+   ],
+   "handles": [
+    "@mizumiya_su"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "綺々羅々ヴィヴィ",
+   "region": "JP",
+   "generation": "FLOW GLOW",
+   "slug": "kikirara_vivi",
+   "aliases": [
+    "ヴィヴィ",
+    "綺々羅々ヴィヴィ"
+   ],
+   "one_line_persona": "余なんも聞いとらんかった族  であり、他のメンバーがゲーム配信中の指示厨行為を辞めるよう呼びかけているのに対し、ヴィヴィはリスナー（vivid、ヴィヴィッド）にゲームの内容や次にやるべきことなどを積極的に確認しながら配信するスタイルを取っている。",
+   "speech": "アッカーン",
+   "relationships": null,
+   "self_reference": "私、うち、ヴィヴィ、ヴィヴィたん、俺",
+   "source_urls": [
+    "https://seesaawiki.jp/hololivetv/d/%e5%ba%a1%b9%cd%e5%a1%b9%a5%f4%a5%a3%a5%f4%a5%a3"
+   ],
+   "read_status": {
+    "collection": "structured_cached",
+    "machine": "independently_checked_from_compacted_records",
+    "model_full_read": "undocumented"
+   },
+   "card_path": "people/kikirara_vivi/card.md",
+   "readings": [
+    "ききらら ゔぃゔぃ"
+   ],
+   "handles": [
+    "@kikiraravivi"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "虎金妃笑虎",
+   "region": "JP",
+   "generation": "FLOW GLOW",
+   "slug": "koganei_niko",
+   "aliases": [
+    "笑虎",
+    "にこ",
+    "虎金妃笑虎"
+   ],
+   "one_line_persona": "基本的には低いトーンで話すが、モノマネが得意と自負するだけあって声色の幅が広く、ロリ声やショタ声も出せる。",
+   "speech": "あああああ！",
+   "relationships": null,
+   "self_reference": "ニコたん、笑虎、私（わたし・わたくし）、俺",
+   "source_urls": [
+    "https://seesaawiki.jp/hololivetv/d/%b8%d7%b6%e2%c8%de%be%d0%b8%d7"
+   ],
+   "read_status": {
+    "collection": "structured_cached",
+    "machine": "independently_checked_from_compacted_records",
+    "model_full_read": "undocumented"
+   },
+   "card_path": "people/koganei_niko/card.md",
+   "readings": [
+    "こがねい にこ"
+   ],
+   "handles": [
+    "@koganeiniko"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "輪堂千速",
+   "region": "JP",
+   "generation": "FLOW GLOW",
+   "slug": "rindo_chihaya",
+   "aliases": [
+    "千速",
+    "ちはや",
+    "輪堂千速"
+   ],
+   "one_line_persona": "「楽しくていくらでも話せてしまう」（物理）。",
+   "speech": "○○さー / ○○さぁ⤴",
+   "relationships": null,
+   "self_reference": "千速、千速ちゃん、ちは、ちはちゃん、あたし、私（わたし・わたくし）、俺、僕、オラ",
+   "source_urls": [
+    "https://seesaawiki.jp/hololivetv/d/%ce%d8%c6%b2%c0%e9%c2%ae"
+   ],
+   "read_status": {
+    "collection": "structured_cached",
+    "machine": "independently_checked_from_compacted_records",
+    "model_full_read": "undocumented"
+   },
+   "card_path": "people/rindo_chihaya/card.md",
+   "readings": [
+    "りんどう ちはや"
+   ],
+   "handles": [
+    "@rindochihaya"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "響咲リオナ",
+   "region": "JP",
+   "generation": "FLOW GLOW",
+   "slug": "isaki_riona",
+   "aliases": [
+    "リオナ",
+    "響咲リオナ"
+   ],
+   "one_line_persona": "FLOW GLOWのリーダーらしく歌とダンスのガチ勢。",
+   "speech": "○○さん",
+   "relationships": null,
+   "self_reference": "私（わたし・わたくし）、あたい、リオナ、俺、おいら、おら",
+   "source_urls": [
+    "https://seesaawiki.jp/hololivetv/d/%b6%c1%ba%e9%a5%ea%a5%aa%a5%ca"
+   ],
+   "read_status": {
+    "collection": "structured_cached",
+    "machine": "independently_checked_from_compacted_records",
+    "model_full_read": "undocumented"
+   },
+   "card_path": "people/isaki_riona/card.md",
+   "readings": [
+    "いさき りおな"
+   ],
+   "handles": [
+    "@isakiriona"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "一条莉々華",
+   "region": "JP",
+   "generation": "ReGLOSS",
+   "slug": "ichijou_ririka",
+   "aliases": [
+    "莉々華",
+    "りりか",
+    "一条莉々華"
+   ],
+   "one_line_persona": "第一印象はコミュ強の陽キャギャルらしい印象だが、本人曰く陽キャの皮を被っている陰キャタイプらしい（「オタクに優しいギャル風オタク」）。",
+   "speech": "あはあはあはあは…",
+   "relationships": null,
+   "self_reference": "莉々華、私",
+   "source_urls": [
+    "https://seesaawiki.jp/hololivetv/d/%b0%ec%be%f2%e8%bd%a1%b9%b2%da"
+   ],
+   "read_status": {
+    "collection": "structured_cached",
+    "machine": "independently_checked_from_compacted_records",
+    "model_full_read": "undocumented"
+   },
+   "card_path": "people/ichijou_ririka/card.md",
+   "readings": [
+    "いちじょう りりか"
+   ],
+   "handles": [
+    "@ichijouririka"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "儒烏風亭らでん",
+   "region": "JP",
+   "generation": "ReGLOSS",
+   "slug": "juufuutei_raden",
+   "aliases": [
+    "らでん",
+    "儒烏風亭らでん"
+   ],
+   "one_line_persona": "しょっぱなから「酒カス・ヤニカス・スロカスのカスの大三元」を標榜し、配信内容とトーク力があまりにぶっ飛んでいたため初見では怪物、バケモノなどと凄まじい形容をされがちだが、あくまでネタに全力でアクセルを踏めるというだけで、常識やモラルは(意外にも)ちゃんとある。",
+   "speech": "ああぁぁぁぁいいい！",
+   "relationships": null,
+   "self_reference": "らでん、私、オレ、JFT、儂(わし)",
+   "source_urls": [
+    "https://seesaawiki.jp/hololivetv/d/%bc%f4%b1%a8%c9%f7%c4%e2%a4%e9%a4%c7%a4%f3"
+   ],
+   "read_status": {
+    "collection": "structured_cached",
+    "machine": "independently_checked_from_compacted_records",
+    "model_full_read": "undocumented"
+   },
+   "card_path": "people/juufuutei_raden/card.md",
+   "readings": [
+    "じゅうふうてい らでん"
+   ],
+   "handles": [
+    "@juufuuteiraden"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "火威青",
+   "region": "JP",
+   "generation": "ReGLOSS",
+   "slug": "hiodoshi_ao",
+   "aliases": [
+    "青",
+    "あおくん",
+    "火威青"
+   ],
+   "one_line_persona": "落ち込むような出来事からの立ち直り力の高さに定評がある。",
+   "speech": "〜、うん",
+   "relationships": null,
+   "self_reference": "僕",
+   "source_urls": [
+    "https://seesaawiki.jp/hololivetv/d/%b2%d0%b0%d2%c0%c4"
+   ],
+   "read_status": {
+    "collection": "structured_cached",
+    "machine": "independently_checked_from_compacted_records",
+    "model_full_read": "undocumented"
+   },
+   "card_path": "people/hiodoshi_ao/card.md",
+   "readings": [
+    "ひおどし あお"
+   ],
+   "handles": [
+    "@hiodoshiao"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 「卒業生」欄に掲載（元DEV_IS ReGLOSS）"
+  },
+  {
+   "name": "轟はじめ",
+   "region": "JP",
+   "generation": "ReGLOSS",
+   "slug": "todoroki_hajime",
+   "aliases": [
+    "はじめ",
+    "轟はじめ"
+   ],
+   "one_line_persona": "性格は「青春」を目指し、ダンスが好きという前向きで一生懸命。",
+   "speech": "○○しなはじめ / なにやってんのはじめ",
+   "relationships": null,
+   "self_reference": "うち、はじめ、私、わし、僕、某（それがし）",
+   "source_urls": [
+    "https://seesaawiki.jp/hololivetv/d/%b9%ec%a4%cf%a4%b8%a4%e1"
+   ],
+   "read_status": {
+    "collection": "structured_cached",
+    "machine": "independently_checked_from_compacted_records",
+    "model_full_read": "undocumented"
+   },
+   "card_path": "people/todoroki_hajime/card.md",
+   "readings": [
+    "とどろき はじめ"
+   ],
+   "handles": [
+    "@todoroki_hajime"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "音乃瀬奏",
+   "region": "JP",
+   "generation": "ReGLOSS",
+   "slug": "otonose_kanade",
+   "aliases": [
+    "奏",
+    "かなで",
+    "音乃瀬奏"
+   ],
+   "one_line_persona": "ほんわかマイペースで間延びした口調で話すが、初配信からリスナーを煽るいたずらっ子であり、前例  も豊  富な  クソガキ（誉め言葉）の系譜。",
+   "speech": "○○かーも！",
+   "relationships": null,
+   "self_reference": "奏、私、奏ちゃん",
+   "source_urls": [
+    "https://seesaawiki.jp/hololivetv/d/%b2%bb%c7%b5%c0%a5%c1%d5"
+   ],
+   "read_status": {
+    "collection": "structured_cached",
+    "machine": "independently_checked_from_compacted_records",
+    "model_full_read": "undocumented"
+   },
+   "card_path": "people/otonose_kanade/card.md",
+   "readings": [
+    "おとのせ かなで"
+   ],
+   "handles": [
+    "@otonosekanade"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "ラプラス・ダークネス",
+   "region": "JP",
+   "generation": "holoX",
+   "slug": "laplus_darknesss",
+   "aliases": [
+    "ラプラス",
+    "らぷらす",
+    "ラプラス・ダークネス"
+   ],
+   "one_line_persona": "何かと弄られやすいが、その度に全力でツッコミを入れるツッコミ担当。",
+   "speech": "いやいやいやいや",
+   "relationships": null,
+   "self_reference": "吾輩、俺、わたし、あたし、わたくし",
+   "source_urls": [
+    "https://seesaawiki.jp/hololivetv/d/%a5%e9%a5%d7%a5%e9%a5%b9%a1%a6%a5%c0%a1%bc%a5%af%a5%cd%a5%b9",
+    "https://seesaawiki.jp/hololivetv/d/%A5%E9%A5%D7%A5%E9%A5%B9%A1%A6%A5%C0%A1%BC%A5%AF%A5%CD%A5%B9"
+   ],
+   "read_status": {
+    "collection": "structured_cached",
+    "machine": "independently_checked_from_compacted_records",
+    "model_full_read": "undocumented"
+   },
+   "card_path": "people/laplus_darknesss/card.md",
+   "readings": [],
+   "handles": [
+    "@LaplusDarknesss",
+    "@wagahaida_L"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "博衣こより",
+   "region": "JP",
+   "generation": "holoX",
+   "slug": "hakui_koyori",
+   "aliases": [
+    "こより",
+    "こよ",
+    "博衣こより"
+   ],
+   "one_line_persona": "理系のため分析や謎解きなどを好む。",
+   "speech": "◯◯って言った！",
+   "relationships": null,
+   "self_reference": "こよ、ぼく、こより、こよちゃん、こよりちゃん、こんこよ",
+   "source_urls": [
+    "https://seesaawiki.jp/hololivetv/d/%c7%ee%b0%e1%a4%b3%a4%e8%a4%ea"
+   ],
+   "read_status": {
+    "collection": "structured_cached",
+    "machine": "independently_checked_from_compacted_records",
+    "model_full_read": "undocumented"
+   },
+   "card_path": "people/hakui_koyori/card.md",
+   "readings": [
+    "はくいこより"
+   ],
+   "handles": [
+    "@hakuikoyori"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "沙花叉クロヱ",
+   "region": "JP",
+   "generation": "holoX",
+   "slug": "sakamata_chloe",
+   "aliases": [
+    "クロヱ",
+    "沙花叉",
+    "沙花叉クロヱ"
+   ],
+   "one_line_persona": "何かと弱気になりがち且つ虐められたがりなきらいがあり、他のホロメンにも「嗜虐心をくすぐられる」とよく言われている。",
+   "speech": "ではな〜",
+   "relationships": null,
+   "self_reference": "沙花叉、私、沙花叉クロヱ",
+   "source_urls": [
+    "https://seesaawiki.jp/hololivetv/d/%ba%bb%b2%d6%ba%b5%a5%af%a5%ed%a5%f1"
+   ],
+   "read_status": {
+    "collection": "structured_cached",
+    "machine": "independently_checked_from_compacted_records",
+    "model_full_read": "undocumented"
+   },
+   "card_path": "people/sakamata_chloe/card.md",
+   "readings": [
+    "さかまたくろえ"
+   ],
+   "handles": [
+    "@sakamatachloe"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載（【配信活動終了】の注記あり）"
+  },
+  {
+   "name": "風真いろは",
+   "region": "JP",
+   "generation": "holoX",
+   "slug": "kazama_iroha",
+   "aliases": [
+    "いろは",
+    "いろは殿",
+    "風真いろは"
+   ],
+   "one_line_persona": "本人によればかっこよくいたいという理由で配信では普段よりも若干低い声で喋っているらしい。",
+   "speech": "○○的さむしんぐ",
+   "relationships": null,
+   "self_reference": "かざま、わたし、風真いろは、ござる、ござるさん",
+   "source_urls": [
+    "https://seesaawiki.jp/hololivetv/d/%c9%f7%bf%bf%a4%a4%a4%ed%a4%cf"
+   ],
+   "read_status": {
+    "collection": "structured_cached",
+    "machine": "independently_checked_from_compacted_records",
+    "model_full_read": "undocumented"
+   },
+   "card_path": "people/kazama_iroha/card.md",
+   "readings": [
+    "かざまいろは"
+   ],
+   "handles": [
+    "@kazamairohach"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "鷹嶺ルイ",
+   "region": "JP",
+   "generation": "holoX",
+   "slug": "takane_lui",
+   "aliases": [
+    "ルイ",
+    "ルイ姉",
+    "鷹嶺ルイ"
+   ],
+   "one_line_persona": "基本的にしっかり者だが、時たまものすごいPONをしでかす事がある。",
+   "speech": "○○ですね。",
+   "relationships": null,
+   "self_reference": "私(わたくし、わたし)、わし、俺",
+   "source_urls": [
+    "https://seesaawiki.jp/hololivetv/d/%c2%eb%ce%e6%a5%eb%a5%a4"
+   ],
+   "read_status": {
+    "collection": "structured_cached",
+    "machine": "independently_checked_from_compacted_records",
+    "model_full_read": "undocumented"
+   },
+   "card_path": "people/takane_lui/card.md",
+   "readings": [
+    "たかねるい"
+   ],
+   "handles": [
+    "@takanelui",
+    "@sub_luilui"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "宙科そぴあ",
+   "region": "JP",
+   "generation": "アソビ★まわり隊！",
+   "slug": "sorashina_sopia",
+   "aliases": null,
+   "one_line_persona": "科学好きの宇宙飛行士。",
+   "speech": null,
+   "relationships": null,
+   "self_reference": "私（わたし）",
+   "source_urls": [
+    "https://seesaawiki.jp/hololivetv/d/%c3%e8%b2%ca%a4%bd%a4%d4%a4%a2"
+   ],
+   "read_status": {
+    "collection": "raw_cached",
+    "machine": "structure_checked",
+    "model_full_read": "undocumented"
+   },
+   "card_path": "people/sorashina_sopia/card.md",
+   "readings": [
+    "そらしな そぴあ"
+   ],
+   "handles": [
+    "@sorashina_sopia"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "熱千めら",
+   "region": "JP",
+   "generation": "アソビ★まわり隊！",
+   "slug": "achichi_mela",
+   "aliases": null,
+   "one_line_persona": "元気な火消し屋のサラマンダー。",
+   "speech": null,
+   "relationships": null,
+   "self_reference": "わし",
+   "source_urls": [
+    "https://seesaawiki.jp/hololivetv/d/%c7%ae%c0%e9%a4%e1%a4%e9"
+   ],
+   "read_status": {
+    "collection": "raw_cached",
+    "machine": "structure_checked",
+    "model_full_read": "undocumented"
+   },
+   "card_path": "people/achichi_mela/card.md",
+   "readings": [
+    "あちち めら"
+   ],
+   "handles": [
+    "@achichi_mela"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "百灯キョーコ",
+   "region": "JP",
+   "generation": "アソビ★まわり隊！",
+   "slug": "hyakuto_kyoko",
+   "aliases": null,
+   "one_line_persona": "拡声器を携えるヒーローポリス。",
+   "speech": null,
+   "relationships": null,
+   "self_reference": "私（わたし）",
+   "source_urls": [
+    "https://seesaawiki.jp/hololivetv/d/%c9%b4%c5%f4%a5%ad%a5%e7%a1%bc%a5%b3"
+   ],
+   "read_status": {
+    "collection": "raw_cached",
+    "machine": "structure_checked",
+    "model_full_read": "undocumented"
+   },
+   "card_path": "people/hyakuto_kyoko/card.md",
+   "readings": [
+    "ひゃくとう きょーこ"
+   ],
+   "handles": [
+    "@hyakuto_kyoko"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "鈴鳴つづり",
+   "region": "JP",
+   "generation": "アソビ★まわり隊！",
+   "slug": "suzuna_tsuzuri",
+   "aliases": null,
+   "one_line_persona": "手紙と笑顔を届けるヤギの郵便屋。",
+   "speech": null,
+   "relationships": null,
+   "self_reference": "私（わたし）",
+   "source_urls": [
+    "https://seesaawiki.jp/hololivetv/d/%ce%eb%cc%c4%a4%c4%a4%c5%a4%ea"
+   ],
+   "read_status": {
+    "collection": "raw_cached",
+    "machine": "structure_checked",
+    "model_full_read": "undocumented"
+   },
+   "card_path": "people/suzuna_tsuzuri/card.md",
+   "readings": [
+    "すずな つづり"
+   ],
+   "handles": [
+    "@suzuna_tsuzuri"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "大神ミオ",
+   "region": "JP",
+   "generation": "ゲーマーズ",
+   "slug": "ookami_mio",
+   "aliases": [
+    "ミオ",
+    "ミオしゃ",
+    "大神ミオ"
+   ],
+   "one_line_persona": "メンバーの多くが自由奔放なホロライブにおいて、かなり貴重なツッコミ役でありストッパー。",
+   "speech": "○○ってコト?",
+   "relationships": null,
+   "self_reference": "うち、わたし",
+   "source_urls": [
+    "https://seesaawiki.jp/hololivetv/d/%c2%e7%bf%c0%a5%df%a5%aa"
+   ],
+   "read_status": {
+    "collection": "structured_cached",
+    "machine": "independently_checked_from_compacted_records",
+    "model_full_read": "undocumented"
+   },
+   "card_path": "people/ookami_mio/card.md",
+   "readings": [],
+   "handles": [
+    "@ookamimio",
+    "@ookamimio_sab"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "戌神ころね",
+   "region": "JP",
+   "generation": "ゲーマーズ",
+   "slug": "inugami_korone",
+   "aliases": [
+    "ころね",
+    "ころさん",
+    "戌神ころね"
+   ],
+   "one_line_persona": "ホロライブ随一のスタミナと身体能力を誇る体力オバケ。",
+   "speech": "あたまよすー",
+   "relationships": null,
+   "self_reference": "ころね、こーね(こぉね)、あたし",
+   "source_urls": [
+    "https://seesaawiki.jp/hololivetv/d/%d8%fc%bf%c0%a4%b3%a4%ed%a4%cd"
+   ],
+   "read_status": {
+    "collection": "structured_cached",
+    "machine": "independently_checked_from_compacted_records",
+    "model_full_read": "undocumented"
+   },
+   "card_path": "people/inugami_korone/card.md",
+   "readings": [
+    "いぬがみころね"
+   ],
+   "handles": [
+    "@inugamikorone",
+    "@k5r6n3"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  },
+  {
+   "name": "猫又おかゆ",
+   "region": "JP",
+   "generation": "ゲーマーズ",
+   "slug": "nekomata_okayu",
+   "aliases": [
+    "おかゆ",
+    "おにぎりゃー",
+    "猫又おかゆ"
+   ],
+   "one_line_persona": "ホロライブメンバーでは１・２を争う程の温厚な性格。",
+   "speech": "○○かな〜？ ○○かな〜？",
+   "relationships": null,
+   "self_reference": "ぼく",
+   "source_urls": [
+    "https://seesaawiki.jp/hololivetv/d/%c7%ad%cb%f4%a4%aa%a4%ab%a4%e6"
+   ],
+   "read_status": {
+    "collection": "structured_cached",
+    "machine": "independently_checked_from_compacted_records",
+    "model_full_read": "undocumented"
+   },
+   "card_path": "people/nekomata_okayu/card.md",
+   "readings": [
+    "ねこまたおかゆ"
+   ],
+   "handles": [
+    "@nekomataokayu",
+    "@MO_OKAYU_GU"
+   ],
+   "wiki_status": "wikiトップ（2026-09-27取得）: 在籍メンバー欄に掲載"
+  }
+ ]
+}

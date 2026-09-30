@@ -1,0 +1,15 @@
+interface:
+  display_name: ホロライブ
+  short_description: 指定文で発動し、公式・wiki・呼称一覧を読み人物像と根拠を確認する
+  default_prompt: 'ホロライブスキルを使用してください。
+
+    $hololive-wiki で対象人物・時期に合う根拠を確認し、必須の読了範囲と未確認事項を整理して質問に答えてください。'
+  icon_small: assets/icon.svg
+  icon_large: assets/icon.svg
+policy:
+  allow_implicit_invocation: false
+  products:
+  - chatgpt
+  - codex
+  - api
+  - atlas
