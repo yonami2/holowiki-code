@@ -34,11 +34,21 @@ MAX_BYTES = 24 * 1024 * 1024
 MAX_GRID_CELLS = 1_000_000
 MAX_PAGE_GRID_CELLS = 4_000_000
 MAX_PAGE_GRID_WORK = 4_000_000
-VERSION = "3.9.0+skill.4"
+VERSION = "3.9.0+skill.5"
 DEFAULT_UA = "HololiveWikiReader/3.9.0 (Python urllib; public single-page reader)"
 DESKTOP_UA = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/130.0.0.0 Safari/537.36 HololiveWikiReader/3.2"
 REDIRECT_CODES = {301, 302, 303, 307, 308}
 RETRY_CODES = {408, 429, 500, 502, 503, 504}
+# Seconds. A socket timeout the platform cannot hold makes urllib raise OverflowError (about 9e9 s on Linux, 2**31
+# milliseconds = 2.1e6 s on Windows), and a Retry-After of 400 digits is infinity, which JSON cannot carry: neither
+# is taken above this (11.6 days).
+MAX_SECONDS = 10 ** 6
+# Bytes per read. One read(n) allocates n bytes before it reads any (a limit of 1 TiB is a MemoryError, one beyond
+# the C index limit an OverflowError), so a file or a decompressed body is read in pieces up to the limit.
+READ_CHUNK = 1 << 20
+# Open elements looked through for an optional end tag (<p>, <li>, <td>...). Browsers stop building a tree deeper than
+# a few hundred levels; a page nested 20,000 <ul><li> deep would otherwise cost the square of its depth.
+MAX_OPEN_ELEMENT_SCAN = 512
 
 # How the caller named the page. These describe one invocation, not the stored
 # response, so a cache record must not carry them into a later run.
@@ -298,6 +308,27 @@ def read_response(response, limit, deadline):
     return b"".join(chunks)
 
 
+def path_exists(path):
+    """Path.exists(), False (as in Python 3.14) for a name no file system can look up: Python before 3.14 raises
+    OSError for a name that is too long, so a long --cache-dir or --index-file was a traceback."""
+    try:
+        return path.exists()
+    except (OSError, ValueError):
+        return False
+
+
+def read_up_to(stream, size):
+    """At most `size` bytes of a binary stream, read READ_CHUNK at a time."""
+    chunks, total = [], 0
+    while total < size:
+        block = stream.read(min(READ_CHUNK, size - total))
+        if not block:
+            break
+        chunks.append(block)
+        total += len(block)
+    return b"".join(chunks)
+
+
 def decompress_body(raw, content_encoding, limit):
     encoding = (content_encoding or "identity").strip().lower()
     if encoding in {"", "identity"}:
@@ -307,13 +338,13 @@ def decompress_body(raw, content_encoding, limit):
     try:
         if encoding in {"gzip", "x-gzip"}:
             with gzip.GzipFile(fileobj=io.BytesIO(raw)) as stream:
-                decoded = stream.read(limit + 1)
+                decoded = read_up_to(stream, limit + 1)
         else:
             decoded = None
             for window in (zlib.MAX_WBITS, -zlib.MAX_WBITS):
                 try:
                     decoder = zlib.decompressobj(window)
-                    candidate = decoder.decompress(raw, limit + 1)
+                    candidate = decoder.decompress(raw, min(limit + 1, sys.maxsize))
                 except zlib.error:
                     if window == -zlib.MAX_WBITS:
                         raise
@@ -339,12 +370,12 @@ def retry_after_seconds(value):
     if not value:
         return None
     if re.fullmatch(r"[0-9]+", value.strip()):
-        return float(value.strip())
+        return min(float(value.strip()), float(MAX_SECONDS))
     try:
         parsed = parsedate_to_datetime(value)
         if parsed.tzinfo is None:
             parsed = parsed.replace(tzinfo=timezone.utc)
-        return max(0.0, (parsed - datetime.now(timezone.utc)).total_seconds())
+        return min(max(0.0, (parsed - datetime.now(timezone.utc)).total_seconds()), float(MAX_SECONDS))
     except (ValueError, TypeError, OverflowError):
         return None
 
@@ -394,9 +425,10 @@ def fetch_page(url, *, timeout=20.0, retries=2, time_budget=90.0, max_bytes=MAX_
                     "Accept-Encoding": "gzip, deflate",
                     "Accept-Language": "ja,en;q=0.5",
                 })
+                socket_timeout = min(timeout, remaining(deadline), MAX_SECONDS)     # a request that has no time is not counted
                 attempts += 1
                 try:
-                    response = opener.open(request, timeout=min(timeout, remaining(deadline)))
+                    response = opener.open(request, timeout=socket_timeout)
                 except HTTPError as exc:
                     response = exc
                 with response:
@@ -421,7 +453,7 @@ def fetch_page(url, *, timeout=20.0, retries=2, time_budget=90.0, max_bytes=MAX_
                         raise ReaderError("not_html", "Response has a non-HTML Content-Type.", content_type=content_type)
                     wire = read_response(response, max_bytes, deadline)
                     raw = decompress_body(wire, response.headers.get("Content-Encoding"), max_bytes)
-                    if not content_type and not re.search(br"(?i)<(?:!doctype\s+html|html\b|head\b|div\b)", raw[:8192]):
+                    if not content_type and not has_html_evidence(raw):
                         raise ReaderError("not_html", "Missing Content-Type and no recognizable HTML prefix.")
                     return raw, {
                         "requested_url": requested_url, "url": final_url,
@@ -448,8 +480,14 @@ def fetch_page(url, *, timeout=20.0, retries=2, time_budget=90.0, max_bytes=MAX_
                 failure.details.update(http_requests=attempts, retry_history=history)
                 raise failure from exc
             delay = max(0.5 * (2 ** attempt), retry_hint or 0)
-            if delay > 30 or delay >= remaining(deadline):
-                raise ReaderError("retry_deferred", "Retry-After/backoff exceeds the remaining budget. Try again later.", retry_after_seconds=delay, last_error=failure.code) from exc
+            left = deadline - time.monotonic()
+            if left <= 0:
+                raise ReaderError("time_budget_exceeded", "The network time budget was exhausted.",
+                                  http_requests=attempts, retry_history=history) from exc
+            if delay > 30 or delay >= left:
+                raise ReaderError("retry_deferred", "Retry-After/backoff exceeds the remaining budget. Try again later.",
+                                  retry_after_seconds=delay, last_error=failure.code,
+                                  http_requests=attempts, retry_history=history) from exc
             history.append({"error_code": failure.code, "http_status": failure.details.get("http_status"), "wait_seconds": delay})
             time.sleep(delay)
     raise ReaderError("network_error", "No response was obtained.")
@@ -472,9 +510,9 @@ class MetaCharset(HTMLParser):
         attrs = dict(attrs)
         if attrs.get("charset"):
             self.charsets.append(attrs["charset"].strip())
-        elif attrs.get("http-equiv", "").lower() == "content-type":
+        elif (attrs.get("http-equiv") or "").lower() == "content-type":      # a bare attribute parses to None
             msg = Message()
-            msg["Content-Type"] = attrs.get("content", "")
+            msg["Content-Type"] = attrs.get("content") or ""
             value = msg.get_content_charset()
             if value:
                 self.charsets.append(value)
@@ -879,7 +917,9 @@ class ArticleParser(HTMLParser):
         return self.root is not None
 
     def _close_optional(self, tags, barriers):
-        for pos in range(len(self.stack) - 1, 0, -1):
+        # Looks at most MAX_OPEN_ELEMENT_SCAN open elements up, so a page that nests <ul><li> without end tags
+        # costs a bounded amount per tag instead of the whole stack.
+        for pos in range(len(self.stack) - 1, max(0, len(self.stack) - 1 - MAX_OPEN_ELEMENT_SCAN), -1):
             if self.stack[pos].tag in tags:
                 del self.stack[pos:]
                 return
@@ -1985,17 +2025,60 @@ class ResponseProbe(HTMLParser):
             self.mobile_style |= (attrs.get("href") or "").startswith("https://static.seesaawiki.jp/css/wiki/lite/")
 
 
+_LINK_TAG = r'''(?is)<link(?=[\s/>])(?:[^>"']|"[^"]*"|'[^']*')*>'''
+_LINK_TAG_BYTES, _LINK_TAG_TEXT = re.compile(_LINK_TAG.encode("ascii")), re.compile(_LINK_TAG)
+_HTML_EVIDENCE = r"(?i)<(?:!doctype\s+html|html\b|head\b|div\b)"
+_HTML_EVIDENCE_BYTES, _HTML_EVIDENCE_TEXT = re.compile(_HTML_EVIDENCE.encode("ascii")), re.compile(_HTML_EVIDENCE)
+
+
+def wide_text(raw, content_type=""):
+    """The response decoded as text when its bytes do not keep ASCII markup as it is: UTF-16 or UTF-32 (a byte
+    order mark, or NUL bytes between the letters) or a charset in the Content-Type that encodes ASCII otherwise.
+    None for every other response. The checks below search the raw bytes for ASCII markup; for such a response
+    they search this text instead."""
+    head = raw[:4096]
+    wide = head.startswith((codecs.BOM_UTF32_LE, codecs.BOM_UTF32_BE, codecs.BOM_UTF16_LE, codecs.BOM_UTF16_BE)) or b"\x00" in head
+    if not wide and content_type:
+        message = Message()
+        message["Content-Type"] = content_type
+        codec = text_codec(message.get_content_charset())
+        try:
+            wide = bool(codec) and "<a>".encode(codec) != b"<a>"
+        except (UnicodeError, LookupError):
+            wide = False
+    if not wide:
+        return None
+    try:
+        return decode_page(raw, content_type or "")[0]
+    except (ReaderError, ValueError, LookupError):
+        return None
+
+
+def has_html_evidence(raw, content_type=""):
+    """Whether the start of a response that names no Content-Type looks like an HTML document."""
+    if _HTML_EVIDENCE_BYTES.search(raw[:8192]):
+        return True
+    text = wide_text(raw[:8192], content_type)
+    return text is not None and _HTML_EVIDENCE_TEXT.search(text) is not None
+
+
 def is_mobile_response(raw, metadata):
     if metadata.get("http_status") != 200:
         return False
-    if b"/css/wiki/lite/" not in raw:
+    text = wide_text(raw, metadata.get("content_type"))
+    if text is None:
+        data, marker, ampersand, closer, link_tag = raw, b"/css/wiki/lite/", b"&", b">", _LINK_TAG_BYTES
+    else:
+        data, marker, ampersand, closer, link_tag = text, "/css/wiki/lite/", "&", ">", _LINK_TAG_TEXT
+    if marker not in data:
         # HTML entities can encode any part of the stylesheet URL. Inspect
         # candidate link tags before rejecting, including > inside quotes.
-        link_tags = re.finditer(br'''(?is)<link(?=[\s/>])(?:[^>"']|"[^"]*"|'[^']*')*>''', raw)
-        if not any(b"&" in match.group() for match in link_tags):
+        # A tag ends at a >, so none can begin after the last one: the scan stops
+        # there (a page of unterminated <link tags would cost the square of its size).
+        if not any(ampersand in match.group() for match in link_tag.finditer(data, 0, data.rfind(closer) + 1)):
             return False
     probe = ResponseProbe()
-    probe.feed(_LONG_DECIMAL_REFERENCE.sub(lambda m: " " * len(m.group()), raw.decode("latin-1")))
+    probe.feed(_LONG_DECIMAL_REFERENCE.sub(lambda m: " " * len(m.group()), raw.decode("latin-1") if text is None else text))
     return probe.mobile_style and not probe.inner
 
 
@@ -2011,7 +2094,8 @@ def read_page_with_layout(url, args, limiter):
     if is_mobile_response(raw, metadata):
         previous = metadata
         if args.user_agent == DESKTOP_UA:
-            raise ReaderError("mobile_layout", "The server returned a mobile layout without the full article.")
+            raise ReaderError("mobile_layout", "The server returned a mobile layout without the full article.",
+                              http_requests=metadata["http_requests"])
         try:
             raw, metadata = get(DESKTOP_UA)
         except ReaderError as exc:
@@ -2022,7 +2106,8 @@ def read_page_with_layout(url, args, limiter):
         metadata["layout_fallback"] = {"reason": "HTTP 200 with observed wiki/lite stylesheet and no page-body-inner", "initial_user_agent": args.user_agent}
         metadata["fetch_warnings"] = ["A successful mobile-layout response lacked the full article; fetched the desktop representation once."]
         if is_mobile_response(raw, metadata):
-            raise ReaderError("mobile_layout", "The desktop request also lacks the full article.")
+            raise ReaderError("mobile_layout", "The desktop request also lacks the full article.",
+                              http_requests=metadata["http_requests"])
     return raw, metadata
 
 
@@ -2058,7 +2143,7 @@ class PageCache:
         """Validate stored raw bytes; age/version exceptions never imply freshness."""
         limit = 4 * ((self.max_bytes + 2) // 3) + 131072
         with path.open("rb") as stream:
-            data = stream.read(limit + 1)
+            data = read_up_to(stream, limit + 1)
         if len(data) > limit:
             raise ValueError("record exceeds limit")
         record = json.loads(data)
@@ -2093,7 +2178,7 @@ class PageCache:
         if meta["content_type"]:
             if media.get_content_type() not in {"text/html", "application/xhtml+xml"}:
                 raise ValueError("non-HTML content type")
-        elif not re.search(br"(?i)<(?:!doctype\s+html|html\b|head\b|div\b)", raw[:8192]):
+        elif not has_html_evidence(raw):
             raise ValueError("missing HTML evidence")
         response_meta = {key: value for key, value in meta.items() if key in RESPONSE_METADATA_KEYS}
         # JSON permits escaped lone surrogates; UTF-8 output does not. Reject
@@ -2102,11 +2187,13 @@ class PageCache:
         json.dumps(response_meta, ensure_ascii=False).encode("utf-8")
         return raw, response_meta, record, age
 
-    def load(self, url, user_agent):
+    def load(self, url, user_agent, *, ad_filter="strict", max_grid_cells=MAX_GRID_CELLS):
+        """A reusable snapshot's bytes and metadata, or None. The snapshot is checked with the settings the page
+        will be read with (the ad filter and the grid budget), so what is accepted here is what is then parsed."""
         if self.directory is None:
             return None
         path = self.path(url, user_agent)
-        if not path.exists():
+        if not path_exists(path):
             return None
         try:
             raw, meta, record, age = self.read_snapshot(path)
@@ -2117,7 +2204,7 @@ class PageCache:
                 raise ValueError("request identity mismatch")
             html, decoded = decode_page(raw, meta["content_type"])
             prepared, charrefs = prepare_surrogate_charrefs(html, "html")
-            parsed = parse_article(prepared, meta["url"])
+            parsed = parse_article(prepared, meta["url"], max_grid_cells=max_grid_cells, ad_filter=ad_filter)
             if (parsed["article_integrity"]["unclosed_required_container"]
                     or is_mobile_response(raw, meta) or not parsed["article_selector"].startswith("#page-body-inner")):
                 raise ValueError("incomplete article")
@@ -2225,7 +2312,7 @@ class TitleIndex:
         self.entries = {}
         self.warnings = []
         self._serialized_size = None
-        if self.path and self.path.exists():
+        if self.path and path_exists(self.path):
             try:
                 with self.path.open("rb") as stream:
                     raw = stream.read(self.LIMIT + 1)
@@ -2369,7 +2456,7 @@ class TitleIndex:
         return sorted(matches, key=lambda x: (x["title"], x["url"]))[:limit]
 
 
-def rebuild_title_index(cache, index):
+def rebuild_title_index(cache, index, *, ad_filter="strict", max_grid_cells=MAX_GRID_CELLS):
     """Recollect observed links from raw snapshots, without HTTP or freshness claims.
 
     Valid existing observations are kept: deleted/invalid cache files do not
@@ -2407,7 +2494,7 @@ def rebuild_title_index(cache, index):
             if decoded["decode_lossy"]:
                 raise ValueError("lossy byte decoding; index not harvested")
             prepared = prepare_surrogate_charrefs(html, "html")[0]
-            parsed = parse_article(prepared, meta["url"])
+            parsed = parse_article(prepared, meta["url"], max_grid_cells=max_grid_cells, ad_filter=ad_filter)
             if (parsed["article_integrity"]["unclosed_required_container"]
                     or is_mobile_response(raw, meta)
                     or not parsed["article_selector"].startswith("#page-body-inner")):
@@ -2916,14 +3003,18 @@ def main(argv=None):
             cli.error("--rebuild-index cannot be combined with HTML input/output, encoding override or refresh")
     index_name = "titles.json" if args.wiki == "hololivetv" else "titles-" + args.wiki + ".json"
     index_path = args.index_file or (args.cache_dir / index_name if args.cache_dir else None)
-    paths = [p.resolve() for p in (args.output, args.save_html, args.html_file, index_path) if p is not None]
+    try:
+        paths = [p.resolve() for p in (args.output, args.save_html, args.html_file, index_path) if p is not None]
+    except (OSError, ValueError, UnicodeError):
+        cli.error("A path argument cannot be used (an invalid character, or a name the file system cannot look up).")
     if len(paths) != len(set(paths)):
         cli.error("Input HTML, output files and title index must use different paths")
     index = TitleIndex(index_path, wiki=args.wiki)
     cache = PageCache(args.cache_dir, max_bytes=args.max_bytes, ttl=args.ttl, policy=args.cache_policy)
+    requests_made = None          # HTTP requests of a page that was fetched, for an error that comes after the fetch
     try:
         if args.rebuild_index:
-            result = rebuild_title_index(cache, index)
+            result = rebuild_title_index(cache, index, ad_filter=args.ad_filter, max_grid_cells=args.max_grid_cells)
         elif args.search is not None:
             result = {"reader_version": VERSION, "query": args.search, "wiki": args.wiki,
                       "known_articles": len(index.entries),
@@ -2933,18 +3024,19 @@ def main(argv=None):
             url, title_info = resolve_source(args, index)
             if args.html_file:
                 with args.html_file.open("rb") as stream:
-                    raw = stream.read(args.max_bytes + 1)
+                    raw = read_up_to(stream, args.max_bytes + 1)
                 if len(raw) > args.max_bytes:
                     raise ReaderError("page_too_large", "Local HTML exceeds the byte limit.")
                 metadata = {"url": url, "requested_url": url, "source": "local_html", "fetched_at": None,
                             "content_type": args.content_type or "", "html_bytes": len(raw), "http_requests": 0, "from_cache": False}
             else:
-                cached = None if args.refresh or args.encoding else cache.load(url, args.user_agent)
+                cached = None if args.refresh or args.encoding else cache.load(url, args.user_agent, ad_filter=args.ad_filter, max_grid_cells=args.max_grid_cells)
                 if cached:
                     raw, metadata = cached
                     metadata["source"] = "cache"
                 else:
                     raw, metadata = read_page_with_layout(url, args, RateLimiter())
+                    requests_made = metadata["http_requests"]
                     metadata.update(source="http", from_cache=False)
                 if args.save_html:
                     write_requested_file(args.save_html, raw, "The saved HTML")
@@ -2980,6 +3072,8 @@ def main(argv=None):
     except (ReaderError, ValueError, OSError, UnicodeError, LookupError) as exc:
         result = {"error": str(exc), "error_code": getattr(exc, "code", "processing_error")}
         result.update(getattr(exc, "details", {}))
+        if requests_made is not None:
+            result.setdefault("http_requests", requests_made)
         if isinstance(exc, ReaderError) and exc.code == "http_error" and exc.details.get("http_status") == 404:
             if args.title is not None:
                 wanted = args.title
