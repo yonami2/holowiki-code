@@ -2100,9 +2100,11 @@ def read_page_with_layout(url, args, limiter):
             raw, metadata = get(DESKTOP_UA)
         except ReaderError as exc:
             exc.details["http_requests"] = exc.details.get("http_requests", 0) + previous["http_requests"]
+            exc.details["retry_history"] = previous.get("retry_history", []) + exc.details.get("retry_history", [])
             exc.details["layout_fallback"] = "Initial HTTP 200 mobile representation was incomplete; the single desktop request failed."
             raise
         metadata["http_requests"] += previous["http_requests"]
+        metadata["retry_history"] = previous.get("retry_history", []) + metadata.get("retry_history", [])      # as the count above
         metadata["layout_fallback"] = {"reason": "HTTP 200 with observed wiki/lite stylesheet and no page-body-inner", "initial_user_agent": args.user_agent}
         metadata["fetch_warnings"] = ["A successful mobile-layout response lacked the full article; fetched the desktop representation once."]
         if is_mobile_response(raw, metadata):
