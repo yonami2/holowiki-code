@@ -140,6 +140,9 @@ python3 scripts/hololive_cache.py --status
     - `restore-v1` の出力（380ファイル）は元のv1と一致した。
     - スキルのテスト37件は、Linux の Python 3.9・3.11・3.13 で成功した。展開したアーカイブの `verify` は4,601件すべて一致し、目録にないファイル・バイトコードはなかった。
     - Wine上のWindows版Python（3.9.13・3.13.15）で、新しいテストとリーダー関連のテスト82件、探索スクリプトのすべてを実行し、成功した（`audits/skill_update_2026-10-01/results.txt`）。この実行で、タイムアウトの上限を10^8秒にしていた誤り（Windowsのソケットは約2.1×10^6秒までしか受け付けない）が見つかり、10^6秒に直した。実機のWindowsでの確認は、GitHub Actionsのジョブで行う。
+    - GitHub Actions（[hololive-wiki skill](https://github.com/yonami2/holowiki-code/actions/runs/36875647512)、コミット `0595b58`）：Windows・Linux の Python 3.9 と 3.13、Linux の 3.10〜3.12、macOS の 3.13 の8ジョブと、[Windowsの起動ファイルの確認](https://github.com/yonami2/holowiki-code/actions/runs/36875699939)（Python 3.9・3.13の2ジョブ）がすべて成功した。
+    - GitHub Actions（[hololive-wiki skill](https://github.com/yonami2/holowiki-code/actions/runs/36883092081)、コミット `f059770`。リーダーは `0595b58` と、デスクトップ版の再取得での `retry_history` の2行だけが違う）：Linux の Python 3.9〜3.13（5ジョブ）と Windows の 3.9・3.13（2ジョブ）が成功した（Windows では `selftest.cmd` と、空白を含むパス・終了コード・出力の順序も確認）。[Windowsの起動ファイルの確認](https://github.com/yonami2/holowiki-code/actions/runs/36883099658)（2ジョブ）も成功した。macOS の 3.13 は、GitHub の macOS ランナーが割り当てられず、15分でキャンセルされた（再実行も同じで、テストは実行されていない）。
+    - その後、この記録を追記した。実行コード・テスト・アーカイブは、CI で成功したものと同じである。
 - **前の版（2026-09-30b、ビルダー3.3.1／資料パック1.4.2）**：利用者の依頼で、コード全体を読み直し、書き間違い・誤作動・エラーの要因を探した。手順と根拠（見直しに使ったスクリプト）はアーカイブ内の `audits/skill_update_2026-09-30b/`。記事本文・索引・資料パック・名前の索引・v1復元用データは変えていない。
   - 見直しの範囲：
     - 全コードの通読（スキル側6ファイル、アーカイブ内のPython 32ファイル、Windowsの起動ファイル3件、GitHub Actionsのワークフロー2件）
