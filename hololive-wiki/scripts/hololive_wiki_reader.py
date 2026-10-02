@@ -34,7 +34,7 @@ MAX_BYTES = 24 * 1024 * 1024
 MAX_GRID_CELLS = 1_000_000
 MAX_PAGE_GRID_CELLS = 4_000_000
 MAX_PAGE_GRID_WORK = 4_000_000
-VERSION = "3.9.0+skill.5"
+VERSION = "3.9.0+skill.6"
 DEFAULT_UA = "HololiveWikiReader/3.9.0 (Python urllib; public single-page reader)"
 DESKTOP_UA = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/130.0.0.0 Safari/537.36 HololiveWikiReader/3.2"
 REDIRECT_CODES = {301, 302, 303, 307, 308}
@@ -46,9 +46,6 @@ MAX_SECONDS = 10 ** 6
 # Bytes per read. One read(n) allocates n bytes before it reads any (a limit of 1 TiB is a MemoryError, one beyond
 # the C index limit an OverflowError), so a file or a decompressed body is read in pieces up to the limit.
 READ_CHUNK = 1 << 20
-# Open elements looked through for an optional end tag (<p>, <li>, <td>...). Browsers stop building a tree deeper than
-# a few hundred levels; a page nested 20,000 <ul><li> deep would otherwise cost the square of its depth.
-MAX_OPEN_ELEMENT_SCAN = 512
 
 # How the caller named the page. These describe one invocation, not the stored
 # response, so a cache record must not carry them into a later run.
@@ -91,11 +88,15 @@ def load_adblock():
     spec = importlib.util.spec_from_file_location("hololive_adblock", path)
     module = importlib.util.module_from_spec(spec)
     sys.modules["hololive_adblock"] = module
+    # The skill runs this reader from its scripts/ folder, which stays as shipped: no __pycache__ beside it.
+    writes, sys.dont_write_bytecode = sys.dont_write_bytecode, True
     try:
         spec.loader.exec_module(module)
     except Exception:
         del sys.modules["hololive_adblock"]
         raise
+    finally:
+        sys.dont_write_bytecode = writes
     return module
 
 
@@ -884,7 +885,42 @@ class _Node:
         self.children = []
 
 
-class ArticleParser(HTMLParser):
+class _OpenElements:
+    """The stack of open elements, with the positions of each tag name in it.
+
+    Which element an end tag closes (the nearest open one of its name, unless a barrier such as a table lies
+    between), and whether one is open at all, are answered from the positions: no walk down the stack. A page
+    that nests 16,000 <div> and then sends 16,000 end tags that close nothing cost the square of that (13 s);
+    every operation is now constant time, or proportional to the elements it closes."""
+
+    def _reset_open(self):
+        self.stack = []
+        self.open_at = {}            # tag -> positions in self.stack, ascending
+
+    def _push(self, node):
+        self.open_at.setdefault(node.tag, []).append(len(self.stack))
+        self.stack.append(node)
+
+    def _pop_to(self, position):
+        """Close the element at `position` and every element opened inside it."""
+        for node in self.stack[position:]:
+            self.open_at[node.tag].pop()
+        del self.stack[position:]
+
+    def _last(self, tag):
+        """Position of the nearest open element named `tag`, or -1."""
+        positions = self.open_at.get(tag)
+        return positions[-1] if positions else -1
+
+    def _close_optional(self, tags, barriers):
+        """Close the nearest open element of `tags` (never the container at position 0) unless an element of
+        `barriers` is nearer: what an implied end tag of <p>, <li>, <td>... closes."""
+        found = max(self._last(tag) for tag in tags)
+        if found > 0 and found > max(self._last(tag) for tag in barriers):
+            self._pop_to(found)
+
+
+class ArticleParser(_OpenElements, HTMLParser):
     """Parse only the requested article container, keeping collapsed HTML data."""
 
     VOID = {"area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta", "param", "source", "track", "wbr"}
@@ -900,7 +936,7 @@ class ArticleParser(HTMLParser):
         self.ad_skips = ad_filter.SkipLog() if ad_filter else None
         self.root = None
         self.root_closed = False
-        self.stack = []
+        self._reset_open()
         self.title = []
         self.in_title = False
         self.title_seen = False
@@ -915,16 +951,6 @@ class ArticleParser(HTMLParser):
     @property
     def found_article(self):
         return self.root is not None
-
-    def _close_optional(self, tags, barriers):
-        # Looks at most MAX_OPEN_ELEMENT_SCAN open elements up, so a page that nests <ul><li> without end tags
-        # costs a bounded amount per tag instead of the whole stack.
-        for pos in range(len(self.stack) - 1, max(0, len(self.stack) - 1 - MAX_OPEN_ELEMENT_SCAN), -1):
-            if self.stack[pos].tag in tags:
-                del self.stack[pos:]
-                return
-            if self.stack[pos].tag in barriers:
-                return
 
     def handle_starttag(self, tag, attrs):
         if self.skip_tag:
@@ -959,15 +985,14 @@ class ArticleParser(HTMLParser):
         if not self.stack:
             if self.root is None and attrs.get("id") == self.target_id:
                 self.root = _Node(tag, attrs, self.getpos()[0])
-                self.stack.append(self.root)
+                self._push(self.root)
             return
         if tag in {"td", "th"}:
             self._close_optional({"td", "th"}, {"tr", "table"})
-            nearest = next((node for node in reversed(self.stack) if node.tag in {"table", "tr"}), None)
-            if nearest and nearest.tag == "table":
+            if self._last("table") > self._last("tr"):           # a cell straight in a table: the row is implied
                 row = _Node("tr", source_line=self.getpos()[0])
                 self.stack[-1].children.append(row)
-                self.stack.append(row)
+                self._push(row)
         elif tag == "tr":
             self._close_optional({"tr"}, {"table"})
         elif tag in {"thead", "tbody", "tfoot"}:
@@ -994,7 +1019,7 @@ class ArticleParser(HTMLParser):
                 self.warnings.append("An invalid article link was retained as text.")
         self.stack[-1].children.append(node)
         if tag not in self.VOID:
-            self.stack.append(node)
+            self._push(node)
 
     def handle_startendtag(self, tag, attrs):
         self.handle_starttag(tag, attrs)
@@ -1014,14 +1039,14 @@ class ArticleParser(HTMLParser):
             self.head_closed = True
         elif tag in {"svg", "math"}:
             self.foreign_depth = max(0, self.foreign_depth - 1)
-        for pos in range(len(self.stack) - 1, -1, -1):
-            if self.stack[pos].tag == tag:
-                if pos == 0:
-                    self.root_closed = True
-                del self.stack[pos:]
-                return
-            if tag in {"td", "th", "tr"} and self.stack[pos].tag == "table":
-                return
+        position = self._last(tag)
+        if position < 0:
+            return                       # nothing of this name is open: the end tag closes nothing
+        if tag in {"td", "th", "tr"} and self._last("table") > position:
+            return                       # a table opened inside the cell or row: the end tag stays inside it
+        if position == 0:
+            self.root_closed = True
+        self._pop_to(position)
 
     def handle_data(self, data):
         if self.skip_tag:
@@ -1096,7 +1121,9 @@ def _node_text(node, references=False, article=False, omit_footnotes=False, *,
                link_mode=None, footnotes=None, footnote_mode="markers",
                omit_footer_labels=False, expand_short_urls=False, omit_classes=(),
                line_footnotes=None, heading_lines=None, line_links=None,
-               table_text_cache=None):
+               leave_out=()):
+    # leave_out: elements inside node that are read on their own (nested tables, headings, list items). Each is a
+    # block, so a line break in its place keeps the lines around it as they were.
     if node is None:
         return ""
     pieces = []
@@ -1113,9 +1140,8 @@ def _node_text(node, references=False, article=False, omit_footnotes=False, *,
         tag = item.tag
         if set((item.attrs.get("class") or "").split()).intersection(omit_classes):
             continue
-        if (not closing and item is not node and tag == "table"
-                and table_text_cache is not None and item in table_text_cache):
-            pieces.append("\n" + table_text_cache[item] + "\n")
+        if not closing and item is not node and item in leave_out:
+            pieces.append("\n")
             continue
         number = _footnote_number(item)
         fragment_only = tag == "a" and (item.attrs.get("href") or "").strip().startswith("#")
@@ -1297,17 +1323,16 @@ def _span(cell, attr, warnings):
     return int(raw)
 
 
-def _table_references(node, cached_tables):
-    """Collect ordered references without revisiting already summarized tables."""
-    links, notes, pending = {}, {}, [node]
+def _table_references(node):
+    """The link ids and footnote numbers in `node` in source order, and the tables directly inside it. A table
+    inside it is read as a table of its own, so what that table holds is not counted here."""
+    links, notes, tables, pending = {}, {}, [], [node]
     while pending:
         current = pending.pop()
         if not isinstance(current, _Node):
             continue
-        if current is not node and current in cached_tables:
-            child_links, child_notes = cached_tables[current]
-            links.update(dict.fromkeys(child_links))
-            notes.update(dict.fromkeys(child_notes))
+        if current is not node and current.tag == "table":
+            tables.append(current)
             continue
         key = getattr(current, "link_id", None)
         if key:
@@ -1316,33 +1341,32 @@ def _table_references(node, cached_tables):
         if number:
             notes[number] = None
         pending.extend(reversed(current.children))
-    return list(links), list(notes)
+    return list(links), list(notes), tables
 
 
-def _table_content_cache(root):
-    """Summarize inner tables first; ancestor cells reuse their rendered text.
+def _own_texts(root, wanted):
+    """{element: its text} for the elements under `root` that `wanted` accepts, in source order.
 
-    A table is a block, so its leading/trailing line boundaries isolate its
-    normalized text from its siblings. This preserves the final cell text
-    while avoiding repeated walks through deeply nested table descendants.
+    An element of the same kind inside one is left out of its text (it is a
+    block, so the lines around it stay as they were): it has an entry of its
+    own. Taking it in repeated the innermost text once for every element
+    around it, the square of their nesting in time and size (2,000 list
+    items nested in a tag list: 19 s).
     """
-    texts, clean_texts, references = {}, {}, {}
-    tables = [node for node in _walk(root) if node.tag == "table"]
-    for table in reversed(tables):
-        references[table] = _table_references(table, references)
-        texts[table] = _node_text(table, table_text_cache=texts)
-        clean_texts[table] = (_node_text(table, omit_footnotes=True, table_text_cache=clean_texts)
-                             if references[table][1] else texts[table])
-    return texts, clean_texts, references
+    nodes = [node for node in _walk(root) if wanted(node)]
+    inner = set(nodes)
+    return {node: _node_text(node, leave_out=inner) for node in nodes}
 
 
 def _extract_table(node, index, headings, warnings, *, max_grid_cells=MAX_GRID_CELLS,
-                   grid_budget=None, content_cache=None):
-    texts, clean_texts, references = content_cache if content_cache is not None else ({}, {}, {})
+                   grid_budget=None, table_numbers=None):
+    """One table's rows and cells. A table inside a cell is read as a table of its own: the cell's text, links
+    and notes leave it out, and nested_tables gives its index (`table_numbers`: {table: index} on the page)."""
+    table_numbers = table_numbers if table_numbers is not None else {}
     result = {"index": index, "source_line": node.source_line, "headings": list(headings), "rows": []}
     captions = list(_table_descendants(node, "caption"))
     if captions:
-        result["caption"] = _node_text(captions[0], table_text_cache=texts)
+        result["caption"] = _node_text(captions[0], leave_out=set(_table_references(captions[0])[2]))
     unsupported_span = False
     for row_index, row in enumerate(_table_descendants(node, "tr"), 1):
         row_data = {"index": row_index, "source_line": row.source_line, "cells": []}
@@ -1351,13 +1375,16 @@ def _extract_table(node, index, headings, warnings, *, max_grid_cells=MAX_GRID_C
         for cell_index, cell in enumerate(cells, 1):
             rowspan, colspan = _span(cell, "rowspan", warnings), _span(cell, "colspan", warnings)
             unsupported_span |= rowspan is None or colspan is None
-            link_ids, note_numbers = _table_references(cell, references)
-            value = {"index": cell_index, "tag": cell.tag, "text": _node_text(cell, table_text_cache=texts), "source_line": cell.source_line,
+            link_ids, note_numbers, nested = _table_references(cell)
+            inner = set(nested)
+            value = {"index": cell_index, "tag": cell.tag, "text": _node_text(cell, leave_out=inner), "source_line": cell.source_line,
                      "rowspan": rowspan, "colspan": colspan,
                      "link_ids": link_ids}
             if note_numbers:
                 value["footnote_numbers"] = note_numbers
-            clean_text = (_node_text(cell, omit_footnotes=True, table_text_cache=clean_texts)
+            if any(table in table_numbers for table in nested):
+                value["nested_tables"] = [table_numbers[table] for table in nested if table in table_numbers]
+            clean_text = (_node_text(cell, omit_footnotes=True, leave_out=inner)
                           if note_numbers else value["text"])
             if clean_text != value["text"]:
                 value["text_without_footnotes"] = clean_text
@@ -1536,6 +1563,45 @@ def _footnote_source_text(node):
     return "".join(pieces).strip()
 
 
+def _footer_rows(box, covered):
+    """[(row, numbers)]: the rows (li) of a footnote list that hold a footer note number, in source order.
+
+    A row holding one number defines that note with everything inside it: the
+    rows within it are part of its text, not more definitions of the note. A
+    row holding several (a malformed or nested list) comes with two of them,
+    and the rows within it are read. Footnote lists nested in `box` are added
+    to `covered`, since their rows are read here once. Numbers are gathered
+    from the inside out, so nesting costs no more than the list's size;
+    reading each row's whole subtree cost its square (2,000 nested rows, 51 s).
+    """
+    nodes = list(_walk(box))
+    found = {}
+    for node in reversed(nodes):
+        own = _footnote_number(node, footer=True)
+        numbers = [own] if own else []
+        for child in node.children:
+            if len(numbers) > 1:
+                break
+            if isinstance(child, _Node):
+                for number in found[child]:
+                    if number not in numbers:
+                        numbers.append(number)
+        found[node] = numbers[:2]
+        if node is not box and "footer-footnote" in (node.attrs.get("class") or "").split():
+            covered.add(node)
+    rows, pending = [], [box]
+    while pending:
+        node = pending.pop()
+        if not found[node]:
+            continue
+        if node.tag == "li":
+            rows.append((node, found[node]))
+            if len(found[node]) == 1:
+                continue
+        pending.extend(child for child in reversed(node.children) if isinstance(child, _Node))
+    return rows
+
+
 def _extract_footnotes(root, warnings, link_mode="references"):
     """Compare two representations from the SAME page, preserving each source."""
     notes = {}
@@ -1552,6 +1618,7 @@ def _extract_footnotes(root, warnings, link_mode="references"):
                                          "footer_entries": [], "agreement": "unavailable",
                                          "marker_references": []})
 
+    covered = set()          # footnote lists inside one already read
     for node in _walk(root):
         number = _footnote_number(node)
         if number:
@@ -1569,17 +1636,12 @@ def _extract_footnotes(root, warnings, link_mode="references"):
         footer_number = _footnote_number(node, footer=True)
         if footer_number and not _is_footnote_label(node, footer_number):
             warnings.append(f"Footnote {footer_number}: unexpected footer label content at HTML line {node.source_line}; text retained.")
-        if "footer-footnote" not in (node.attrs.get("class") or "").split():
+        if "footer-footnote" not in (node.attrs.get("class") or "").split() or node in covered:
             continue
-        for row in _walk(node):
-            if row.tag != "li":
-                continue
-            numbers = list(dict.fromkeys(number for child in _walk(row)
-                                        if (number := _footnote_number(child, footer=True))))
+        for row, numbers in _footer_rows(node, covered):
             # A malformed or nested list must not attach several notes to one number.
             if len(numbers) != 1:
-                if numbers:
-                    warnings.append(f"Ambiguous footer footnote at HTML line {row.source_line}; raw text retained.")
+                warnings.append(f"Ambiguous footer footnote at HTML line {row.source_line}; raw text retained.")
                 continue
             body = _footnote_body_without_separator(row, marker_titles.get(numbers[0], ()))
             raw_text = _node_text(body, omit_footer_labels=True)
@@ -1634,12 +1696,13 @@ def _extract_footnotes(root, warnings, link_mode="references"):
     return notes
 
 
-class _MetadataParser(HTMLParser):
+class _MetadataParser(_OpenElements, HTMLParser):
     """Keep only three narrow metadata blocks instead of a second full DOM."""
 
     def __init__(self):
         super().__init__(convert_charrefs=True)
-        self.stack, self.results = [], {}
+        self._reset_open()
+        self.results = {}
 
     def handle_starttag(self, tag, attrs):
         attrs = dict(attrs)
@@ -1653,25 +1716,19 @@ class _MetadataParser(HTMLParser):
                 return
             root = _Node(tag, attrs, self.getpos()[0])
             self.results[kind] = root
-            self.stack.append(root)
+            self._push(root)
             return
         if tag == "li":
-            for position in range(len(self.stack) - 1, 0, -1):
-                if self.stack[position].tag == "li":
-                    del self.stack[position:]
-                    break
-                if self.stack[position].tag in {"ul", "ol"}:
-                    break
+            self._close_optional({"li"}, {"ul", "ol"})
         node = _Node(tag, attrs, self.getpos()[0])
         self.stack[-1].children.append(node)
         if tag not in ArticleParser.VOID:
-            self.stack.append(node)
+            self._push(node)
 
     def handle_endtag(self, tag):
-        for position in range(len(self.stack) - 1, -1, -1):
-            if self.stack[position].tag == tag:
-                del self.stack[position:]
-                break
+        position = self._last(tag)
+        if position >= 0:
+            self._pop_to(position)
 
     def handle_startendtag(self, tag, attrs):
         self.handle_starttag(tag, attrs)
@@ -1679,7 +1736,7 @@ class _MetadataParser(HTMLParser):
             self.handle_endtag(tag)
 
     def handle_data(self, data):
-        if self.stack and not any(node.tag in ArticleParser.SKIP for node in self.stack):
+        if self.stack and not any(self.open_at.get(tag) for tag in ArticleParser.SKIP):
             self.stack[-1].children.append(data)
 
     def metadata(self):
@@ -1695,9 +1752,9 @@ class _MetadataParser(HTMLParser):
         for key in ("categories", "tags"):
             root = self.results.get(key)
             if root:
-                result[key] = list(dict.fromkeys(_node_text(node) for node in _walk(root)
-                                                 if node.tag == "li" and "title" not in (node.attrs.get("class") or "").split()
-                                                 and _node_text(node)))
+                texts = _own_texts(root, lambda node: node.tag == "li")
+                result[key] = list(dict.fromkeys(text for node, text in texts.items()
+                                                 if "title" not in (node.attrs.get("class") or "").split() and text))
         return result
 
 
@@ -1777,9 +1834,21 @@ def _feed_until(parser, html, done):
     sidebar and footer (about 160,000 characters on every page), which
     neither parser reads. A parser that never finishes gets the whole
     document and is closed, exactly as a single feed() would.
+
+    A chunk ends where markup starts ("<"): HTMLParser passes on the text it
+    has at the end of a chunk, so text cut in two there was two pieces, and a
+    run of spaces cut in two kept two spaces. The parser also keeps back what
+    it cannot finish yet, such as a start tag whose ">" has not come, and reads
+    it again with the next chunk. A chunk is never shorter than what is kept
+    back, so a start tag left open over megabytes is read a few times instead
+    of once for every 64 KB (4 MB took 39 s).
     """
-    for start in range(0, len(html), FEED_CHUNK):
-        parser.feed(html[start:start + FEED_CHUNK])
+    start = 0
+    while start < len(html):
+        end = html.find("<", start + max(FEED_CHUNK, len(getattr(parser, "rawdata", ""))))
+        end = len(html) if end < 0 else end
+        parser.feed(html[start:end])
+        start = end
         if done(parser):
             return True
     parser.close()
@@ -1870,12 +1939,13 @@ def parse_article(html, url, *, link_mode="references", footnote_mode="markers",
         "non_text_definitions": [n for n, note in footnotes.items() if note["definition_state"] == "non_text"],
     }
     headings, tables, current_headings = [], [], []
-    table_content = _table_content_cache(parser.root)
+    table_numbers = {node: number for number, node in enumerate((node for node in _walk(parser.root) if node.tag == "table"), 1)}
+    heading_texts = _own_texts(parser.root, lambda node: re.fullmatch(r"h[1-6]", node.tag))
     for node in _walk(parser.root):
         if re.fullmatch(r"h[1-6]", node.tag):
             # article_line ties this heading to the rendered line it starts, so
             # selection never has to guess from text that merely looks like one.
-            entry = {"level": int(node.tag[1]), "text": _node_text(node), "source_line": node.source_line,
+            entry = {"level": int(node.tag[1]), "text": heading_texts[node], "source_line": node.source_line,
                      "article_line": heading_lines[len(headings)] if len(headings) < len(heading_lines) else None}
             headings.append(entry)
             start = entry["article_line"]
@@ -1888,7 +1958,7 @@ def parse_article(html, url, *, link_mode="references", footnote_mode="markers",
         elif node.tag == "table":
             tables.append(_extract_table(node, len(tables) + 1, current_headings, parser.warnings,
                                          max_grid_cells=max_grid_cells, grid_budget=grid_budget,
-                                         content_cache=table_content))
+                                         table_numbers=table_numbers))
     nicknames = [record for table in tables for record in _nickname_records(table)]
     images = []
     for node in _walk(parser.root):

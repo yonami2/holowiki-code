@@ -37,7 +37,11 @@ def main() -> int:
     parser.add_argument("--summary", action="store_true", help="Print the quick JSON record")
     args = parser.parse_args()
 
-    data = json.loads((CACHE / "quick_profiles_82.json").read_text(encoding="utf-8"))
+    try:
+        data = _shipped("quick_profiles_82.json", _profiles)
+    except ValueError as exc:
+        print(str(exc), file=sys.stderr)
+        return 1
     people = data["people"]
     if args.region:
         people = [person for person in people if person["region"] == args.region]
@@ -48,10 +52,9 @@ def main() -> int:
     if not args.person:
         parser.error("specify a person or --list")
 
-    names = hololive_names.load(CACHE / "names_82.json")
     try:
-        found = hololive_names.resolve(names, args.person)
-    except hololive_names.NameError_ as exc:
+        found = hololive_names.resolve(_shipped("names_82.json", _names), args.person)
+    except (ValueError, hololive_names.NameError_) as exc:
         print(str(exc), file=sys.stderr)
         return 1
     person = next((item for item in people if item["slug"] == found["slug"]), None)
@@ -74,6 +77,35 @@ def main() -> int:
     text = card.decode("utf-8")
     sys.stdout.write(text if text.endswith("\n") else text + "\n")        # as `show` prints it, no blank line added
     return 0
+
+
+def _shipped(name, load):
+    """A file of the skill's cache/ folder. One that is damaged (not JSON, nested deeper than the decoder follows,
+    or of another shape) is a ValueError naming it instead of a traceback; reinstalling the skill restores it."""
+    try:
+        return load(CACHE / name)
+    except (OSError, ValueError, RecursionError) as exc:
+        raise ValueError(f"The skill's file cache/{name} cannot be read ({type(exc).__name__}: {exc}); "
+                         "reinstall the skill.") from None
+
+
+def _profiles(path):
+    data = json.loads(path.read_text(encoding="utf-8"))
+    if not (isinstance(data, dict) and isinstance(data.get("people"), list)
+            and all(isinstance(person, dict) and isinstance(person.get("wiki_status", ""), (str, type(None)))
+                    and all(isinstance(person.get(key), str) for key in ("region", "name", "slug", "card_path"))
+                    for person in data["people"])):
+        raise ValueError("not the skill's summary file")
+    return data
+
+
+def _names(path):
+    with open(path, "rb") as stream:
+        data = json.loads(stream.read().decode("utf-8"))
+    if not (isinstance(data, dict) and data.get("schema") == hololive_names.SCHEMA
+            and isinstance(data.get("people"), dict) and isinstance(data.get("keys"), dict)):
+        raise ValueError("not the skill's names index")
+    return data
 
 
 def _reader_left(exc):

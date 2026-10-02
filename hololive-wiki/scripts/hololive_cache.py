@@ -52,15 +52,18 @@ import sys
 
 ARCHIVE = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))),
                        "cache", "hololive_wiki_person_cache.tar.xz")
-ARCHIVE_SHA256 = "2c10e7e5232017b1d34f2da9a3fe70057634e0d5585967988d4cd2cd26f6542c"
+ARCHIVE_SHA256 = "f4edc44d13842b8a8916cd4ffba069cf21fe429ac1444e63ce7a931927cb99c2"
 # The unpacked MANIFEST.sha256 of this archive: files are checked against it, not against anything
 # stored beside them.
-MANIFEST_SHA256 = "700c40d687c850dbd3341b645d31ccf44c13a39c491ae56a45fd47be19b8be79"
+MANIFEST_SHA256 = "9afdb9bd95756f9aefa92145ef5347f11d51d8711fb22619c379ec2e9a5b3d7c"
 ROOT_NAME = "hololive_wiki_person_cache"
 PREFIX = "hololive-wiki-v3-"
 OVERRIDE = "HOLOLIVE_WIKI_CACHE_DIR"
 RECEIPT = ".wrapper-receipt.json"
 RECEIPT_SCHEMA = 3
+# Bytes. The receipt (about 110 KB) and the unpacked MANIFEST.sha256 (about 500 KB) are read whole; a larger file
+# there is damage, not something to load into memory.
+RECORD_LIMIT = 16 * 1024 * 1024
 CODE_SUFFIXES = (".py", ".cmd")             # imported or executed: hashed on every use
 REPARSE_POINT = getattr(stat, "FILE_ATTRIBUTE_REPARSE_POINT", 0x400)
 POSIX = os.name == "posix"
@@ -241,7 +244,8 @@ def _manifest_digests(root):
     digests = _DIGESTS.get(root)
     if digests is None:
         path = os.path.join(root, "MANIFEST.sha256")
-        _file_info(path)
+        if _file_info(path).st_size > RECORD_LIMIT:
+            raise ValueError("the unpacked MANIFEST.sha256 is not this archive's")
         with open(path, "rb") as stream:
             raw = stream.read()
         if hashlib.sha256(raw).hexdigest() != MANIFEST_SHA256:
@@ -264,7 +268,8 @@ def _complete(root):
         if not (_private(folder) and _private(root)):
             return False
         receipt_path = os.path.join(folder, RECEIPT)
-        _file_info(receipt_path)
+        if _file_info(receipt_path).st_size > RECORD_LIMIT:
+            return False
         with open(receipt_path, "rb") as stream:
             receipt = json.loads(stream.read().decode("utf-8"))
         _DIGESTS.pop(root, None)
@@ -317,7 +322,9 @@ def _complete(root):
                     if hashlib.sha256(stream.read()).hexdigest() != digest:
                         return False
         return True
-    except (OSError, ValueError, TypeError, AttributeError, KeyError):
+    except (OSError, ValueError, TypeError, AttributeError, KeyError, RecursionError):
+        # RecursionError: a receipt nested deeper than the JSON decoder follows ([[[[...]]]]) is damaged like any
+        # other, and the copy is unpacked again; it was a traceback.
         return False
 
 
@@ -461,7 +468,9 @@ def _verify(root):
                             **({"umask": 0o077} if POSIX else {}))
     try:
         report = json.loads(result.stdout.decode("utf-8"))
-    except ValueError:
+    except (ValueError, RecursionError):
+        report = {}
+    if not isinstance(report, dict):
         report = {}
     if result.returncode or not report.get("ok") or report.get("unlisted_files"):
         detail = (report.get("problems") or [])[:3] or result.stderr.decode("utf-8", "replace")[-300:]

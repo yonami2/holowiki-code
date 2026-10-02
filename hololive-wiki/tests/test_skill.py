@@ -82,6 +82,24 @@ class ShippedCopiesTests(unittest.TestCase):
             with self.subTest(name=name):
                 self.assertEqual((CACHE / name).read_bytes(), archive_member(member))
 
+    def test_the_reader_writes_no_bytecode_beside_it(self):
+        # 2026-10-02: run as `python3 scripts/hololive_wiki_reader.py`, the reader compiled hololive_adblock.py into
+        # scripts/__pycache__, so the skill folder did not stay as shipped (the wrapper and the lookup write none).
+        with tempfile.TemporaryDirectory() as td:
+            folder = Path(td)
+            for name in ("hololive_wiki_reader.py", "hololive_adblock.py"):
+                shutil.copyfile(SCRIPTS / name, folder / name)
+            page = folder / "page.html"
+            page.write_text('<html><body><div id="page-body-inner"><div class="user-area"><p>text</p></div></div></body></html>',
+                            encoding="utf-8")
+            env = {key: value for key, value in os.environ.items() if key not in {"PYTHONDONTWRITEBYTECODE", "PYTHONPYCACHEPREFIX"}}
+            process = subprocess.run([sys.executable, str(folder / "hololive_wiki_reader.py"), "--url", "https://seesaawiki.jp/hololivetv/d/x",
+                                      "--html-file", str(page), "--content-type", "text/html; charset=utf-8", "--format", "json"],
+                                     stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=env)
+            self.assertEqual(process.returncode, 0, process.stderr)
+            self.assertEqual(json.loads(process.stdout.decode("utf-8"))["lines"][0]["text"], "text")
+            self.assertEqual(sorted(path.name for path in folder.rglob("*")), ["hololive_adblock.py", "hololive_wiki_reader.py", "page.html"])
+
     def test_companion_files_carry_no_bare_fiction_flag(self):
         for name in ("quick_profiles_82.json", "roster_82.json"):
             data = json.loads((CACHE / name).read_text(encoding="utf-8"))
@@ -223,6 +241,31 @@ class WrapperTests(unittest.TestCase):
         self.assertIn("🌸", out)
         self.assertFalse(out.replace("\r\n", "\n").endswith("\n\n"))      # the card as stored, no blank line added
 
+    def test_lookup_names_a_damaged_file_of_the_skill(self):
+        # 2026-10-02: the lookup read cache/quick_profiles_82.json and names_82.json as they were; one that is not
+        # JSON, nests 10,000 deep or has another shape ended it in a traceback instead of naming the file.
+        deep = b"[" * 10000 + b"]" * 10000
+        cases = [("quick_profiles_82.json", data, ["--list"])
+                 for data in (deep, b"{not json", b"\xff\xfe", b"[]", b'{"people": [1]}', b'{"people": [{"region": 1}]}')]
+        cases += [("names_82.json", data, ["ししろん", "--summary"])
+                  for data in (deep, b"{not json", b"[]", b'{"schema": "x"}', b'{"schema": "hololive-wiki-names/1"}')]
+        for name, data, argv in cases:
+            with self.subTest(name=name, data=data[:12]), tempfile.TemporaryDirectory() as td:
+                copy = Path(td) / "skill"
+                (copy / "scripts").mkdir(parents=True)
+                (copy / "cache").mkdir()
+                for script in ("hololive_cache_lookup.py", "hololive_names.py"):
+                    shutil.copyfile(SCRIPTS / script, copy / "scripts" / script)
+                for shipped in ("quick_profiles_82.json", "names_82.json"):
+                    shutil.copyfile(CACHE / shipped, copy / "cache" / shipped)
+                (copy / "cache" / name).write_bytes(data)
+                code, out, err = run([copy / "scripts" / "hololive_cache_lookup.py", *argv], Path(td) / "unused")
+                self.assertEqual(code, 1, out + err)
+                self.assertIn("cache/" + name, err)
+                self.assertIn("reinstall the skill", err)
+                self.assertNotIn("Traceback", err)
+                self.assertEqual(sorted(copy.rglob("__pycache__")), [])
+
     def test_lookup_list_ends_quietly_when_its_reader_stops(self):
         # `--list | head -1`: the pipe is closed before the list is written. As for the cache CLI and the
         # reader, that is not an error: exit code 0 and no traceback.
@@ -363,6 +406,35 @@ class RepairTests(unittest.TestCase):
         self.assertEqual(code, 0, err)
         self.assertIn("matches: 0", out)                 # read from the copy unpacked again
         self.assertEqual(page.read_bytes(), data)
+
+    def test_a_receipt_nested_too_deep_or_too_large_is_damage(self):
+        # 2026-10-02: a receipt replaced by [[[[...]]]] 10,000 deep ended show, --status and the lookup card in
+        # a RecursionError traceback instead of unpacking the copy again.
+        cache_dir, root = self.fresh()
+        receipt = root.parent / ".wrapper-receipt.json"
+        for data in (b"[" * 10000 + b"]" * 10000, b'{"a":' * 10000 + b"1" + b"}" * 10000):
+            private_file(receipt, data)
+            self.assertFalse(wrapper._complete(root))
+        for data in (b"[" * 10000 + b"]" * 10000, b" " * (wrapper.RECORD_LIMIT + 1)):
+            with self.subTest(size=len(data)):
+                private_file(receipt, data)
+                code, out, err = run([WRAPPER, "--status"], cache_dir)
+                self.assertEqual((code, "Traceback" in err), (0, False), err)
+                self.assertFalse(json.loads(out)["candidates"][0]["complete"])
+                code, out, err = run([WRAPPER, "show", "宝鐘マリン"], cache_dir)
+                self.assertEqual((code, "Traceback" in err), (0, False), err)
+                self.assertTrue(out.startswith("宝鐘マリン | JP"))
+                self.assertTrue(wrapper._complete(root))         # unpacked again, with a new receipt
+                private_file(receipt, data)
+                code, out, err = run([LOOKUP, "宝鐘マリン"], cache_dir)
+                self.assertEqual((code, "Traceback" in err), (0, False), err)
+                self.assertTrue(wrapper._complete(root))
+        manifest = root / "MANIFEST.sha256"
+        private_file(manifest, b"0" * (wrapper.RECORD_LIMIT + 1))
+        self.assertFalse(wrapper._complete(root))
+        code, out, err = run([WRAPPER, "show", "宝鐘マリン"], cache_dir)
+        self.assertEqual(code, 0, err)
+        self.assertTrue(wrapper._complete(root))
 
     def test_bytecode_in_the_cache_is_never_run(self):
         cache_dir, root = self.fresh()
