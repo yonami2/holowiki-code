@@ -363,6 +363,8 @@ READER_UNDER_TEST="$SKILL_ROOT/scripts/hololive_wiki_reader.py" python3 -m unitt
 
 現行のスキル側テスト（`tests/test_skill.py`、40件）は、スキルルートで `python3 -m unittest discover -s tests -v` と実行します。ラッパー（展開先の安全確認、サンドボックス、umask、同時起動、修復、壊れた受領記録・目録からの自動修復、読込時の照合、`--cache` で指定したキャッシュの照合、バイトコードを使わないこと）、lookup（出力を読む側が先に終わる場合、同梱ファイルが壊れている場合を含む）、リーダーがバイトコードを書かないこと、`lzma` のないPythonへの案内、資料パックと同梱ファイルの同一性を検査します。
 
+2026-10-02版の [GitHub Actions run 37074974001](https://github.com/yonami2/holowiki-code/actions/runs/37074974001)（コミット `5c79d2b`）は、Windows Python 3.9／3.13・Ubuntu Python 3.9〜3.13・macOS Python 3.13の8環境すべて成功しました。Windowsの両環境でスキル側40件中30成功・POSIX専用10件スキップ、アーカイブ251件中250成功・v1入力を要する1件スキップです。その前のコミットでは、WindowsのPythonが1万段の入れ子のJSONをそのまま読むため、壊れたキャッシュのファイル名を示す試験が失敗し、どの環境でもファイル名を示すように直しました。結果は、CI完了後に説明文書2件へ追記しました。
+
 2026-09-29版の [GitHub Actions run 36638876368](https://github.com/yonami2/hololive_wiki_reader_v31/actions/runs/36638876368) は、Windows Python 3.9／3.13・Ubuntu Python 3.9〜3.13・macOS Python 3.13の8環境すべて成功しました。Windowsの両環境でスキル側36件中26成功・POSIX専用10件スキップ、アーカイブ193件中192成功・v1入力を要する1件スキップです。今回加えたテスト（読みでの名前の引き当て、表示どおりの見出しでの節の選択、脚注のないページの表示、`--topic` の繰り返し方、取得日ごとのページ数）も、実機のWindowsで成功しました。結果は、CI完了後に説明文書2件へ追記しました。
 
 2026-09-28版の [GitHub Actions run 36496654946](https://github.com/yonami2/hololive_wiki_reader_v31/actions/runs/36496654946) は、Windows Python 3.9／3.13・Ubuntu Python 3.9〜3.13・macOS Python 3.13の8環境すべて成功しました。Windowsの両環境でスキル側36件中26成功・POSIX専用10件スキップ、アーカイブ184件中183成功・v1入力を要する1件スキップです。コード監査への対応で加えたテスト（出力先がジャンクションのときに止まること、入れ替えに失敗したときの復旧など）も、実機のWindowsで成功しました。結果は、CI完了後に説明文書2件へ追記しました。
