@@ -37,7 +37,7 @@ from html import unescape
 from html.parser import HTMLParser
 from urllib.parse import parse_qsl, urlsplit
 
-VERSION = "1.0.0+skill.1"
+VERSION = "1.0.0+skill.2"
 ALLOWED_HOSTS = frozenset({"seesaawiki.jp"})
 
 # Ad serving and ad-tech hosts. A URL matches its exact host or a subdomain,
@@ -499,21 +499,26 @@ class NetworkLog:
 # --- whole-page inventory (audits and the command line) -----------------------
 
 class _Inventory(HTMLParser):
-    """Every ad element on a page and whether it sits inside the article."""
+    """Every ad element on a page and whether it sits inside the article.
+
+    The open elements are kept with the positions of each tag name and with counts of the open article
+    containers, so an end tag and the zone of an element cost the same at any depth (a page that nested 16,000
+    <div> took the square of that)."""
     VOID = {"area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta",
             "param", "source", "track", "wbr"}
 
     def __init__(self, base_url):
         super().__init__(convert_charrefs=True)
         self.base_url, self.stack, self.items = base_url, [], []
+        self.open_at = {}                  # tag -> positions in self.stack, ascending
+        self.inner = self.article = 0      # open #page-body-inner elements / open article containers
         self.raw_tag = None
         self.script_hosts = {}
 
     def _zone(self):
-        inner = any(a.get("id") == "page-body-inner" for _, a in self.stack)
-        if inner and any(_tokens(a, "class") & ARTICLE_CLASSES for _, a in self.stack):
+        if self.inner and self.article:
             return "article"
-        return "article_container_other" if inner else "outside_article_container"
+        return "article_container_other" if self.inner else "outside_article_container"
 
     def handle_starttag(self, tag, attrs):
         attrs = dict(attrs)
@@ -524,7 +529,11 @@ class _Inventory(HTMLParser):
         if tag in {"script", "style"}:
             self.raw_tag = tag
         if tag not in self.VOID:
-            self.stack.append((tag, attrs))
+            inner, article = attrs.get("id") == "page-body-inner", bool(_tokens(attrs, "class") & ARTICLE_CLASSES)
+            self.open_at.setdefault(tag, []).append(len(self.stack))
+            self.stack.append((tag, inner, article))
+            self.inner += inner
+            self.article += article
 
     def handle_startendtag(self, tag, attrs):
         self.handle_starttag(tag, attrs)
@@ -534,10 +543,15 @@ class _Inventory(HTMLParser):
     def handle_endtag(self, tag):
         if tag == self.raw_tag:
             self.raw_tag = None
-        for position in range(len(self.stack) - 1, -1, -1):
-            if self.stack[position][0] == tag:
-                del self.stack[position:]
-                return
+        positions = self.open_at.get(tag)
+        if not positions:
+            return                         # nothing of this name is open
+        position = positions[-1]
+        for name, inner, article in self.stack[position:]:
+            self.open_at[name].pop()
+            self.inner -= inner
+            self.article -= article
+        del self.stack[position:]
 
     def handle_data(self, data):
         if self.raw_tag == "script":
