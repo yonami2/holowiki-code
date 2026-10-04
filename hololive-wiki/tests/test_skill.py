@@ -206,6 +206,22 @@ class WrapperTests(unittest.TestCase):
         self.assertTrue(report["archive_sha256_ok"])
         self.assertEqual(report["candidates"][0]["complete"], True)
 
+    def test_story_takes_up_to_fifteen_people(self):
+        # references/story.md allows 15 people in one story (5 until 2026-10-04). These 15 give the longest pack of
+        # any 15 (a greedy search over all pairs on 2026-10-04): brief, about 95% of the automatic limit.
+        names = ["不知火フレア", "桃鈴ねね", "雪花ラミィ", "宝鐘マリン", "博衣こより", "さくらみこ", "大空スバル", "星街すいせい",
+                 "兎田ぺこら", "戌神ころね", "アキ・ローゼンタール", "白銀ノエル", "夏色まつり", "大神ミオ", "白上フブキ"]
+        code, out, err = run([WRAPPER, "story", *names, "--format", "json"], self.cache_dir)
+        self.assertEqual(code, 0, err)
+        pack = json.loads(out)
+        self.assertEqual([person["name"] for person in pack["people"]], names)
+        self.assertEqual(len(pack["pairs"]), 15 * 14 // 2)
+        self.assertEqual(pack["budget"], {"limit": 12000 + 10000 * 14, "measured_as": "md", "automatic": True})
+        self.assertLessEqual(pack["characters"], pack["budget"]["limit"])
+        guide = (SKILL / "references" / "story.md").read_text(encoding="utf-8")
+        self.assertIn("1回の `story` に入れるのは15人までとする。", guide)
+        self.assertNotIn("5人を超える場合", guide)
+
     def test_no_bytecode_is_written_into_the_cache(self):
         for argv in (["show", "宝鐘マリン"], ["story", "兎田ぺこら"], ["verify"]):
             code, out, err = run([WRAPPER, *argv], self.cache_dir)
