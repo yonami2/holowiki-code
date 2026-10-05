@@ -208,7 +208,9 @@ class WrapperTests(unittest.TestCase):
 
     def test_story_takes_up_to_fifteen_people(self):
         # references/story.md allows 15 people in one story (5 until 2026-10-04). These 15 give the longest pack of
-        # any 15 (a greedy search over all pairs on 2026-10-04): brief, about 95% of the automatic limit.
+        # any 15 (a greedy search over all pairs on 2026-10-04). Since 2026-10-05 the automatic limit is 199,250
+        # characters for 15 people, and the detail level is chosen automatically: each person's section stays
+        # above the pairs' mention candidates.
         names = ["不知火フレア", "桃鈴ねね", "雪花ラミィ", "宝鐘マリン", "博衣こより", "さくらみこ", "大空スバル", "星街すいせい",
                  "兎田ぺこら", "戌神ころね", "アキ・ローゼンタール", "白銀ノエル", "夏色まつり", "大神ミオ", "白上フブキ"]
         code, out, err = run([WRAPPER, "story", *names, "--format", "json"], self.cache_dir)
@@ -216,11 +218,34 @@ class WrapperTests(unittest.TestCase):
         pack = json.loads(out)
         self.assertEqual([person["name"] for person in pack["people"]], names)
         self.assertEqual(len(pack["pairs"]), 15 * 14 // 2)
-        self.assertEqual(pack["budget"], {"limit": 12000 + 10000 * 14, "measured_as": "md", "automatic": True})
+        self.assertEqual(pack["budget"], {"limit": 199250, "measured_as": "md", "automatic": True})
         self.assertLessEqual(pack["characters"], pack["budget"]["limit"])
+        self.assertEqual((pack["detail"], pack["pair_detail"]), ("normal", "brief"))
         guide = (SKILL / "references" / "story.md").read_text(encoding="utf-8")
         self.assertIn("1回の `story` に入れるのは15人までとする。", guide)
+        self.assertIn("15人で199,250字", guide)
         self.assertNotIn("5人を超える場合", guide)
+        self.assertNotIn("--detail brief", guide)
+
+    def test_a_long_story_pack_is_read_in_parts(self):
+        names = ["宝鐘マリン", "兎田ぺこら", "白銀ノエル"]
+        code, whole, note = run([WRAPPER, "story", *names], self.cache_dir)
+        self.assertEqual(code, 0, note)
+        whole = whole.replace("\r\n", "\n")                     # Windows writes \r\n to the pipe
+        count = int(re.search(r"--part 1 から --part (\d+) まで付けて", note).group(1))
+        self.assertGreater(count, 1)
+        bodies = []
+        for number in range(1, count + 1):
+            code, out, err = run([WRAPPER, "story", *names, "--part", str(number)], self.cache_dir)
+            self.assertEqual((code, err), (0, ""))
+            header, body = out.replace("\r\n", "\n").split("\n\n", 1)
+            body, footer = body.rstrip("\n").rsplit("\n\n", 1)
+            self.assertIn(f"全{count}部の第{number}部: ", header)
+            self.assertTrue(footer.startswith(f"（第{number}部ここまで: "), footer)
+            self.assertLessEqual(len(body), 15000)
+            bodies.append(body)
+        self.assertEqual("\n".join(bodies), whole.rstrip("\n"))
+        self.assertIn("--part 1", (SKILL / "references" / "story.md").read_text(encoding="utf-8"))
 
     def test_no_bytecode_is_written_into_the_cache(self):
         for argv in (["show", "宝鐘マリン"], ["story", "兎田ぺこら"], ["verify"]):
