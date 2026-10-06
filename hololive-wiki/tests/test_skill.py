@@ -208,9 +208,9 @@ class WrapperTests(unittest.TestCase):
 
     def test_story_takes_up_to_fifteen_people(self):
         # references/story.md allows 15 people in one story (5 until 2026-10-04). These 15 give the longest pack of
-        # any 15 (a greedy search over all pairs on 2026-10-04). Since 2026-10-05 the automatic limit is 199,250
-        # characters for 15 people, and the detail level is chosen automatically: each person's section stays
-        # above the pairs' mention candidates.
+        # any 15 (a greedy search over all pairs on 2026-10-04). Since 2026-10-06 the automatic limit is 80,000
+        # characters for one person and 10,000 for each other one, at most 200,000, and the detail level is
+        # chosen automatically: each person's section stays above the pairs' mention candidates.
         names = ["不知火フレア", "桃鈴ねね", "雪花ラミィ", "宝鐘マリン", "博衣こより", "さくらみこ", "大空スバル", "星街すいせい",
                  "兎田ぺこら", "戌神ころね", "アキ・ローゼンタール", "白銀ノエル", "夏色まつり", "大神ミオ", "白上フブキ"]
         code, out, err = run([WRAPPER, "story", *names, "--format", "json"], self.cache_dir)
@@ -218,14 +218,52 @@ class WrapperTests(unittest.TestCase):
         pack = json.loads(out)
         self.assertEqual([person["name"] for person in pack["people"]], names)
         self.assertEqual(len(pack["pairs"]), 15 * 14 // 2)
-        self.assertEqual(pack["budget"], {"limit": 199250, "measured_as": "md", "automatic": True})
+        self.assertEqual(pack["budget"], {"limit": 200000, "measured_as": "md", "automatic": True})
         self.assertLessEqual(pack["characters"], pack["budget"]["limit"])
         self.assertEqual((pack["detail"], pack["pair_detail"]), ("normal", "brief"))
         guide = (SKILL / "references" / "story.md").read_text(encoding="utf-8")
         self.assertIn("1回の `story` に入れるのは15人までとする。", guide)
-        self.assertIn("15人で199,250字", guide)
+        self.assertIn("最大200,000字で、13人以上は200,000字", guide)
         self.assertNotIn("5人を超える場合", guide)
         self.assertNotIn("--detail brief", guide)
+
+    def test_story_detail_is_automatic_unless_capped_and_topics_are_words(self):
+        # From the 220,000 variant tried in another chat (2026-10-06): its three people and topics. The topics were
+        # given there as one spaced string first, which found nothing; they are now searched word by word.
+        people = ["天音かなた", "風真いろは", "湊あくあ"]
+        code, out, err = run([WRAPPER, "story", *people, "--topic", "マネージャー 専属 推し 仲良し オカン",
+                              "--format", "json"], self.cache_dir)
+        self.assertEqual(code, 0, err)
+        automatic = json.loads(out)
+        self.assertEqual((automatic["detail"], automatic["pair_detail"]), ("full", "full"))
+        self.assertEqual(automatic["budget"], {"limit": 100000, "measured_as": "md", "automatic": True})
+        self.assertEqual(automatic["topics"], ["マネージャー", "専属", "推し", "仲良し", "オカン"])
+        self.assertEqual(len(automatic["topic_notes"]), 1)
+        self.assertIn("推し: あくたん、ねねち、るしあ先輩", json.dumps(automatic["people"][0]["sections"]["topic"],
+                                                         ensure_ascii=False))
+        for cap in ("normal", "brief"):                     # an explicit --detail is a ceiling
+            code, out, err = run([WRAPPER, "story", *people, "--detail", cap, "--format", "json"], self.cache_dir)
+            self.assertEqual(code, 0, err)
+            pack = json.loads(out)
+            self.assertEqual((pack["detail"], pack["pair_detail"]), (cap, cap))
+        code, out, err = run([WRAPPER, "story", people[0], "--topic", " "], self.cache_dir)
+        self.assertEqual((code, out), (1, ""))
+        self.assertIn("空の話題", err)
+
+    def test_digest_sections_through_the_wrapper(self):
+        argv = [WRAPPER, "show", "兎田ぺこら", "湊あくあ", "--digest"]
+        code, out, err = run(argv + ["--section", "性格", "--section", "特徴", "--section", "あいさつ",
+                                     "--section", "立ち位置"], self.cache_dir)
+        self.assertEqual((code, err), (0, ""))
+        self.assertIn("## 性格・癖", out)
+        self.assertIn("## プロフィール・特徴（詳細）", out)          # 湊あくあ has no 性格・癖
+        self.assertNotIn("## 語録", out)
+        self.assertLess(len(out), 30000)
+        code, out, err = run(argv, self.cache_dir)          # the whole digests: about 350,000 characters
+        self.assertEqual(code, 0, err)
+        self.assertIn("（兎田ぺこらのダイジェストは", err)
+        self.assertIn("--section 見出しの語 で節ごとに読める", err)
+        self.assertIn("--section", (SKILL / "references" / "story.md").read_text(encoding="utf-8"))
 
     def test_a_long_story_pack_is_read_in_parts(self):
         names = ["宝鐘マリン", "兎田ぺこら", "白銀ノエル"]
