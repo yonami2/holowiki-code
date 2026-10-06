@@ -229,19 +229,23 @@ class WrapperTests(unittest.TestCase):
 
     def test_story_detail_is_automatic_unless_capped_and_topics_are_words(self):
         # From the 220,000 variant tried in another chat (2026-10-06): its three people and topics. The topics were
-        # given there as one spaced string first, which found nothing; they are now searched word by word.
+        # given there as one spaced string first, which found nothing; they are now searched word by word. Three
+        # people leave room for ace (2026-10-06b), the level above full: each person's own sections whole.
         people = ["天音かなた", "風真いろは", "湊あくあ"]
         code, out, err = run([WRAPPER, "story", *people, "--topic", "マネージャー 専属 推し 仲良し オカン",
                               "--format", "json"], self.cache_dir)
         self.assertEqual(code, 0, err)
         automatic = json.loads(out)
-        self.assertEqual((automatic["detail"], automatic["pair_detail"]), ("full", "full"))
+        self.assertEqual((automatic["detail"], automatic["pair_detail"]), ("ace", "ace"))
+        own = [{key: count for key, count in person["omitted"].items() if key != "topic"}     # topic lines: 30 each
+               for person in automatic["people"]]
+        self.assertEqual(own, [{}, {}, {}])
         self.assertEqual(automatic["budget"], {"limit": 100000, "measured_as": "md", "automatic": True})
         self.assertEqual(automatic["topics"], ["マネージャー", "専属", "推し", "仲良し", "オカン"])
         self.assertEqual(len(automatic["topic_notes"]), 1)
         self.assertIn("推し: あくたん、ねねち、るしあ先輩", json.dumps(automatic["people"][0]["sections"]["topic"],
                                                          ensure_ascii=False))
-        for cap in ("normal", "brief"):                     # an explicit --detail is a ceiling
+        for cap in ("ace", "full", "normal", "brief"):      # an explicit --detail is a ceiling
             code, out, err = run([WRAPPER, "story", *people, "--detail", cap, "--format", "json"], self.cache_dir)
             self.assertEqual(code, 0, err)
             pack = json.loads(out)
@@ -249,6 +253,8 @@ class WrapperTests(unittest.TestCase):
         code, out, err = run([WRAPPER, "story", people[0], "--topic", " "], self.cache_dir)
         self.assertEqual((code, out), (1, ""))
         self.assertIn("空の話題", err)
+        guide = (SKILL / "references" / "story.md").read_text(encoding="utf-8")
+        self.assertIn("詳細度は詳しい順に ace・full・normal・brief", guide)
 
     def test_digest_sections_through_the_wrapper(self):
         argv = [WRAPPER, "show", "兎田ぺこら", "湊あくあ", "--digest"]
