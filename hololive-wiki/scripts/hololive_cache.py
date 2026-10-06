@@ -52,10 +52,10 @@ import sys
 
 ARCHIVE = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))),
                        "cache", "hololive_wiki_person_cache.tar.xz")
-ARCHIVE_SHA256 = "af523231f693ad6f979a8b925a4d47ad22b1ecdc5f1c892b0547b0187ca73e16"
+ARCHIVE_SHA256 = "5f068706d3f1510dbf2aa677ebf7451648f616392f579f507c5bcdbaa3ed2b35"
 # The unpacked MANIFEST.sha256 of this archive: files are checked against it, not against anything
 # stored beside them.
-MANIFEST_SHA256 = "2701f2f047bd375e4e45f16de938f2df589cbd99fd0b25e22ada85322a4ca3a3"
+MANIFEST_SHA256 = "cbd450fd213611d2d82fb56064ecff327baf2510ff752085288fea96d0b0825a"
 ROOT_NAME = "hololive_wiki_person_cache"
 PREFIX = "hololive-wiki-v3-"
 OVERRIDE = "HOLOLIVE_WIKI_CACHE_DIR"
