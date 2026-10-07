@@ -291,6 +291,38 @@ class WrapperTests(unittest.TestCase):
         self.assertEqual("\n".join(bodies), whole.rstrip("\n"))
         self.assertIn("--part 1", (SKILL / "references" / "story.md").read_text(encoding="utf-8"))
 
+    def test_story_level_shows_the_level_only(self):
+        # 2026-10-07: --level, the last line of story.md's bash boxes, shows the detail level a story command gets
+        # (each person's and the pairs': ace, full, normal or brief) to check it, never the pack itself.
+        guide = (SKILL / "references" / "story.md").read_text(encoding="utf-8")
+        boxes = re.findall(r"```bash\n(.*?)```", guide, flags=re.S)
+        part_box = next(box for box in boxes if "--part 2" in box)
+        self.assertIn("--level", part_box.rstrip().splitlines()[-1])
+        last = boxes[-1].rstrip().splitlines()
+        self.assertTrue(last[-1].endswith(" --level"), last[-1])
+        cast = re.findall(r"'([^']+)'", "\n".join(last[-3:]))
+        self.assertEqual(len(cast), 15)
+        code, out, err = run([WRAPPER, "story", *cast, "--level"], self.cache_dir)
+        self.assertEqual((code, err), (0, ""))
+        lines = out.replace("\r\n", "\n").splitlines()
+        self.assertEqual(len(lines), 2 + 15 + 3)                  # the label, 各人:, 15 people, pairs, size, note
+        shown = [line[4:] for line in last if line.startswith("#   ") and "…" not in line]
+        self.assertGreater(len(shown), 5)
+        for line in shown:                                          # the guide's example is what the command shows
+            self.assertIn(line, lines)
+        people = ["天音かなた", "風真いろは", "湊あくあ"]
+        code, view, err = run([WRAPPER, "story", *people, "--level"], self.cache_dir)
+        self.assertEqual((code, err), (0, ""))
+        self.assertEqual(view.replace("\r\n", "\n").splitlines()[:6],
+                         ["詳細度: ace", "各人:", "- 天音かなた: ace", "- 風真いろは: ace", "- 湊あくあ: ace",
+                          "組み合わせ（3組）: ace"])
+        self.assertNotIn("物語用資料パック", view)
+        code, same, err = run([WRAPPER, "story", *people, "--part", "1", "--level"], self.cache_dir)
+        self.assertEqual((code, same, err), (0, view, ""))
+        code, view, err = run([WRAPPER, "story", *people, "--detail", "normal", "--level"], self.cache_dir)
+        self.assertEqual((code, err), (0, ""))
+        self.assertIn("組み合わせ（3組）: normal", view)
+
     def test_no_bytecode_is_written_into_the_cache(self):
         for argv in (["show", "宝鐘マリン"], ["story", "兎田ぺこら"], ["verify"]):
             code, out, err = run([WRAPPER, *argv], self.cache_dir)
