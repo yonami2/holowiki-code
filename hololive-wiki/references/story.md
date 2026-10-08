@@ -85,14 +85,14 @@ python3 scripts/hololive_cache.py story 'ラプラス・ダークネス' '鷹嶺
 python3 scripts/hololive_cache.py story 'Gawr Gura' 'Mori Calliope' --format json
 
 # 上の holoX・ReGLOSS・FLOW GLOW の15人の詳細度の判定だけを確かめる（--level。資料パックの本文は出さない）。表示の例:
-#   詳細度: 各人 full（うち ace: ラプラス・ダークネス、鷹嶺ルイ、風真いろは、響咲リオナ、虎金妃笑虎）・組み合わせ brief
+#   詳細度: 各人 full（うち ace: ラプラス・ダークネス、鷹嶺ルイ、風真いろは、響咲リオナ、綺々羅々ヴィヴィ）・組み合わせ brief
 #   各人:
 #   - ラプラス・ダークネス: ace
 #   - 鷹嶺ルイ: ace
 #   - 博衣こより: full
 #   …（15人分。名前を挙げた順）
 #   組み合わせ（105組）: brief
-#   字数: Markdown 199,889字／上限 200,000字（自動）。--part で全14部
+#   字数: Markdown 199,947字／上限 200,000字（自動）。--part で全14部
 python3 scripts/hololive_cache.py story 'ラプラス・ダークネス' '鷹嶺ルイ' '博衣こより' '沙花叉クロヱ' '風真いろは' \
   '火威青' '音乃瀬奏' '一条莉々華' '儒烏風亭らでん' '轟はじめ' \
   '響咲リオナ' '虎金妃笑虎' '水宮枢' '輪堂千速' '綺々羅々ヴィヴィ' --level
