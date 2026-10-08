@@ -674,14 +674,109 @@ class RepairTests(unittest.TestCase):
             self.assertEqual(code, 1)
             self.assertIn("unsafe cache ancestor", err)
 
-    def test_old_complete_versions_are_not_automatically_deleted(self):
+    def test_other_versions_are_removed_once_this_one_is_unpacked(self):
+        # Until 2026-10-07 every update left the unpacked copy of the version before it (about 300 MB) behind.
         with tempfile.TemporaryDirectory() as td:
             base = Path(td)
-            old = base / (wrapper.PREFIX + wrapper._user_key() + "-" + "0" * 16)
+            own = wrapper.PREFIX + wrapper._user_key() + "-"
+            self.assertEqual(wrapper.FOLDER, own + wrapper.ARCHIVE_SHA256[:16])
+            removed = [base / (own + "0" * 16), base / (own + "0123456789abcdef"), base / (own + "0" * 16 + ".lock"),
+                       base / (own + "1" * 16 + ".lock"),            # a lock folder whose version is already gone
+                       base / (wrapper.PREFIX + "staging-abandoned")]
+            kept = {base / (wrapper.PREFIX + "00000000-" + "0" * 16): "another user's copy",
+                    base / (own + "0" * 15): "not a version name", base / (own + "0" * 16 + ".old"): "not a version name",
+                    base / (own + "g" * 16): "not a version name",
+                    base / (wrapper.PREFIX + "staging-recent"): "a staging folder that may be in use",
+                    base / "unrelated": "not a folder of the skill"}
+            for folder in removed + list(kept):
+                private_folder(folder)
+            for folder in removed[:2]:
+                private_folder(folder / wrapper.ROOT_NAME)
+                page = folder / wrapper.ROOT_NAME / "page.txt"
+                private_file(page, "old text")
+                os.chmod(page, stat.S_IREAD)                       # read-only: on Windows a file attribute
+            private_file(removed[2] / "install.lock", b"")
+            os.utime(removed[4], (1, 1))
+            if os.name == "posix":
+                shared = base / (own + "2" * 16)
+                shared.mkdir()
+                os.chmod(shared, 0o777)
+                kept[shared] = "a folder others can write to"
+                target = base / "target"
+                private_folder(target)
+                private_file(target / "keep.txt", "keep")
+                link = base / (own + "3" * 16)
+                link.symlink_to(target, target_is_directory=True)
+                kept[link] = "a link"
+            report = json.loads(run([WRAPPER, "--status"], base)[1])
+            self.assertEqual(report["candidates"][0]["other_versions"], [removed[0].name, removed[1].name])
+            code, out, err = run([WRAPPER, "--cache-root"], base)
+            self.assertEqual(code, 0, err)
+            self.assertTrue(wrapper._complete(Path(out.strip())))
+            for folder in removed:
+                self.assertFalse(os.path.lexists(folder), folder.name)
+            for folder, why in kept.items():
+                self.assertTrue(os.path.lexists(folder), why)
+            if os.name == "posix":
+                self.assertEqual((target / "keep.txt").read_text(encoding="utf-8"), "keep")
+            names = {path.name for path in base.iterdir()}
+            self.assertTrue({wrapper.FOLDER, wrapper.FOLDER + ".lock"} <= names)
+            self.assertFalse([name for name in names if name.startswith(wrapper.PREFIX + "stale-")])
+            # Reusing the complete copy removes nothing; unpacking again (--repair) does.
+            private_folder(removed[0])
+            self.assertEqual(run([WRAPPER, "--cache-root"], base)[0], 0)
+            self.assertTrue(removed[0].exists())
+            report = json.loads(run([WRAPPER, "--status"], base)[1])
+            self.assertEqual(report["candidates"][0]["other_versions"], [removed[0].name])
+            self.assertEqual(run([WRAPPER, "--repair"], base)[0], 0)
+            self.assertFalse(removed[0].exists())
+            self.assertEqual(json.loads(run([WRAPPER, "--status"], base)[1])["candidates"][0]["other_versions"], [])
+
+    def test_a_version_folder_that_cannot_be_moved_is_left_for_later(self):
+        # Windows refuses to rename a folder while a file in it is open: that version stays, nothing fails.
+        with tempfile.TemporaryDirectory() as td:
+            base = Path(td)
+            old = base / (wrapper.OWN + "0" * 16)
             private_folder(old)
-            os.utime(old, (1, 1))
-            wrapper._tidy(base, wrapper.FOLDER)
-            self.assertTrue(old.exists())
+            private_file(old / "page.txt", "old text")
+            private_folder(base / (old.name + ".lock"))
+            real_rename = os.rename
+
+            def held_open(source, target):
+                if Path(source) == old:
+                    raise PermissionError("simulated: a file in the folder is open on Windows")
+                return real_rename(source, target)
+            with mock.patch.object(wrapper.os, "rename", side_effect=held_open):
+                wrapper._tidy(str(base), wrapper.FOLDER)
+            self.assertEqual((old / "page.txt").read_text(encoding="utf-8"), "old text")
+            self.assertTrue((base / (old.name + ".lock")).is_dir())    # kept while its version is
+            self.assertEqual(sorted(path.name for path in base.iterdir()), [old.name, old.name + ".lock"])
+            wrapper._tidy(str(base), wrapper.FOLDER)                    # the next unpacking
+            self.assertEqual(list(base.iterdir()), [])
+
+    def test_folders_without_permissions_do_not_stop_the_removal(self):
+        # A retry used to call os.open again without its flags (rmtree reports a folder it cannot open that way):
+        # the TypeError ended the command after the new version was in place. A user gets the refusal on POSIX;
+        # for root, who is never refused, it is simulated.
+        with tempfile.TemporaryDirectory() as td:
+            base = Path(td)
+            old = base / (wrapper.OWN + "0" * 16)
+            for folder in (old, old / "closed", old / "closed" / "inner", old / "read-only"):
+                private_folder(folder)
+            private_file(old / "closed" / "inner" / "page.txt", "old text")
+            private_file(old / "read-only" / "page.txt", "old text")
+            os.chmod(old / "closed", 0)
+            os.chmod(old / "read-only", stat.S_IREAD | stat.S_IEXEC)     # on Windows a folder attribute
+            real_open = os.open
+
+            def as_a_user(path, flags, mode=0o777, *, dir_fd=None):
+                info = os.stat(path, dir_fd=dir_fd, follow_symlinks=False)
+                if stat.S_ISDIR(info.st_mode) and not info.st_mode & stat.S_IRUSR:
+                    raise PermissionError(13, "Permission denied", path)
+                return real_open(path, flags, mode, dir_fd=dir_fd)
+            with mock.patch.object(wrapper.os, "open", side_effect=as_a_user):
+                wrapper._tidy(str(base), wrapper.FOLDER)
+            self.assertEqual(list(base.iterdir()), [])
 
     @unittest.skipUnless(os.name == "posix", "umask is POSIX")
     def test_permissive_umask_does_not_make_reused_code_writable(self):

@@ -18,6 +18,15 @@ the manifest. Missing or damaged copies are unpacked again. Run explicit
 --repair while other cache commands are idle; installation is serialized, but
 running readers are not.
 
+Each version of the archive has its own folder (hololive-wiki-v3-<user>-<first
+16 hex digits of the archive's SHA-256>). Once a version is unpacked (first use
+after an update, or --repair), the folders of this user's other versions in the
+same location are removed with their lock folders: each is renamed aside first,
+so a command of that version still running finds no copy, rather than a
+half-deleted one, and unpacks its own again. A folder Windows will not release
+(a file held open) is removed at the next unpacking. Staging folders abandoned
+for a day are removed as well. --status lists the other versions present.
+
 The cache command runs in this process, from source bytes that match the
 manifest: the modules are compiled here and bytecode in __pycache__ is never
 run. Every file the command then reads is hashed and compared with the
@@ -52,10 +61,10 @@ import sys
 
 ARCHIVE = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))),
                        "cache", "hololive_wiki_person_cache.tar.xz")
-ARCHIVE_SHA256 = "4793d85d7d96f1974328183c151df62448b84fa922b89f6c546da155c44921fd"
+ARCHIVE_SHA256 = "fd4fee0b87bfdbdbc7fa02929c2670b2c69a1590a5205b04830b6ec95e305c8c"
 # The unpacked MANIFEST.sha256 of this archive: files are checked against it, not against anything
 # stored beside them.
-MANIFEST_SHA256 = "0bbdf6e6d311c423f82c0815930b5dec8188aef279a75fec92bc78e7de7ce0af"
+MANIFEST_SHA256 = "cf8b297ae5c6bfbe41d2d5c47be3c439cf505f48a01af6fa342d0a805cf237d6"
 ROOT_NAME = "hololive_wiki_person_cache"
 PREFIX = "hololive-wiki-v3-"
 OVERRIDE = "HOLOLIVE_WIKI_CACHE_DIR"
@@ -90,7 +99,8 @@ def _user_key():
     return hashlib.sha256(name.encode("utf-8", "replace")).hexdigest()[:8]
 
 
-FOLDER = PREFIX + _user_key() + "-" + ARCHIVE_SHA256[:16]
+OWN = PREFIX + _user_key() + "-"             # this user's copies: OWN + 16 hex digits of the archive's SHA-256
+FOLDER = OWN + ARCHIVE_SHA256[:16]
 
 
 def _likely_temp():
@@ -477,26 +487,77 @@ def _verify(root):
         raise ValueError(f"v3 cache manifest verification failed: {detail}")
 
 
-def _tidy(base, keep):
-    """Remove abandoned staging folders; completed versions may still have readers."""
+def _other_version(name):
+    """A folder name of another version of this user's unpacked cache, or of its lock folder."""
+    version = name[len(OWN):]
+    if version.endswith(".lock"):
+        version = version[:-len(".lock")]
+    return (name.startswith(OWN) and len(version) == 16 and version != FOLDER[len(OWN):]
+            and all(c in "0123456789abcdef" for c in version))
+
+
+def _remove_tree(path):
+    """Delete a folder of the cache. What fails is given back the owner's permissions (Windows keeps a read-only
+    attribute that blocks deleting a file; a folder without them cannot be emptied), a deletion is tried again,
+    and a second pass empties what the first made readable. A link or junction is never followed. What still
+    cannot be removed (a file another process holds open on Windows) is left for a later attempt."""
     import shutil
+
+    def again(function, failed, _):
+        try:
+            info = os.lstat(failed)
+            if (getattr(info, "st_file_attributes", 0) & stat.FILE_ATTRIBUTE_REPARSE_POINT
+                    or not (stat.S_ISREG(info.st_mode) or stat.S_ISDIR(info.st_mode))):
+                return
+            os.chmod(failed, stat.S_IREAD | stat.S_IWRITE | stat.S_IEXEC)
+            if function in (os.unlink, os.rmdir):       # never os.open, os.close...: they take other arguments
+                function(failed)
+        except OSError:
+            pass
+    for _ in range(2):
+        if sys.version_info >= (3, 12):
+            shutil.rmtree(path, onexc=again)
+        else:
+            shutil.rmtree(path, onerror=again)
+        if not os.path.lexists(path):
+            return
+
+
+def _tidy(base, keep):
+    """Remove this user's other versions with their lock folders (see the module notes), and staging folders
+    abandoned for a day. Only real folders of this user that others cannot write to are touched."""
+    import tempfile
     import time
     now = time.time()
     try:
-        entries = list(os.scandir(base))
+        with os.scandir(base) as listing:
+            entries = sorted(listing, key=lambda entry: entry.name.endswith(".lock"))   # versions before locks
     except OSError:
         return
     for entry in entries:
         name = entry.name
-        if not name.startswith(PREFIX) or name == keep or not _private(entry.path):
+        if not name.startswith(PREFIX) or name in (keep, keep + ".lock") or not _private(entry.path):
+            continue
+        if _other_version(name):
+            if not name.endswith(".lock"):
+                try:
+                    aside = tempfile.mkdtemp(prefix=PREFIX + "stale-", dir=base)
+                except OSError:
+                    continue
+                try:
+                    os.rename(entry.path, os.path.join(aside, "old"))
+                except OSError:
+                    pass                              # held open on Windows: tried again at the next unpacking
+                _remove_tree(aside)
+            elif not os.path.lexists(entry.path[:-len(".lock")]):
+                _remove_tree(entry.path)              # only once its version is gone
             continue
         try:
             old = now - entry.stat(follow_symlinks=False).st_mtime > 24 * 3600
         except OSError:
             continue
-        leftover = name.startswith((PREFIX + "staging-", PREFIX + "stale-"))
-        if leftover and old:
-            shutil.rmtree(entry.path, ignore_errors=True)
+        if old and name.startswith((PREFIX + "staging-", PREFIX + "stale-")):
+            _remove_tree(entry.path)
 
 
 def _lock(descriptor):
@@ -653,6 +714,13 @@ def status():
                 candidate["unsafe"] = str(exc)
         candidate["private"] = _private(dest) if candidate["exists"] else None
         candidate["complete"] = bool(candidate["private"]) and _complete(os.path.join(dest, ROOT_NAME))
+        try:
+            with os.scandir(base) as listing:
+                others = [entry.name for entry in listing
+                          if _other_version(entry.name) and not entry.name.endswith(".lock") and _private(entry.path)]
+        except OSError:
+            others = []
+        candidate["other_versions"] = sorted(others)      # removed when this version is next unpacked
         report["candidates"].append(candidate)
     return report
 
