@@ -208,9 +208,9 @@ class WrapperTests(unittest.TestCase):
 
     def test_story_takes_fifteen_people_as_before(self):
         # These 15 give the longest pack of any 15 (a greedy search over all pairs on 2026-10-04); 15 was the most
-        # one story took until 2026-10-08. Since 2026-10-06 the automatic limit is 80,000 characters for one person
-        # and 10,000 for each other one, at most 200,000, and the detail level is chosen automatically: each
-        # person's section stays above the pairs' mention candidates.
+        # one story took until 2026-10-08. Since 2026-10-09b the automatic limit is 120,000 characters for one person
+        # and 15,000 for each other one, at most 300,000 (2026-10-06: 80,000, 10,000 and 200,000), and the detail
+        # level is chosen automatically: each person's section stays above the pairs' mention candidates.
         names = ["不知火フレア", "桃鈴ねね", "雪花ラミィ", "宝鐘マリン", "博衣こより", "さくらみこ", "大空スバル", "星街すいせい",
                  "兎田ぺこら", "戌神ころね", "アキ・ローゼンタール", "白銀ノエル", "夏色まつり", "大神ミオ", "白上フブキ"]
         code, out, err = run([WRAPPER, "story", *names, "--format", "json"], self.cache_dir)
@@ -218,19 +218,20 @@ class WrapperTests(unittest.TestCase):
         pack = json.loads(out)
         self.assertEqual([person["name"] for person in pack["people"]], names)
         self.assertEqual(len(pack["pairs"]), 15 * 14 // 2)
-        self.assertEqual(pack["budget"], {"limit": 200000, "measured_as": "md", "automatic": True})
+        self.assertEqual(pack["budget"], {"limit": 300000, "measured_as": "md", "automatic": True})
         self.assertLessEqual(pack["characters"], pack["budget"]["limit"])
-        self.assertEqual((pack["detail"], pack["pair_detail"]), ("normal", "brief"))
+        self.assertEqual((pack["detail"], pack["pair_detail"]), ("full", "brief"))
         guide = (SKILL / "references" / "story.md").read_text(encoding="utf-8")
         self.assertIn("人数に上限はなく、場面の顔ぶれ全員を1回の `story` に入れる（組を分けて実行しない）。", guide)
         self.assertNotIn("15人までとする", guide)
-        self.assertIn("最大200,000字で、13人以上は200,000字", guide)
+        self.assertIn("最大300,000字で、13人以上は300,000字", guide)
         self.assertNotIn("5人を超える場合", guide)
         self.assertNotIn("--detail brief", guide)
 
     def test_a_scene_with_many_members(self):
         # 2026-10-09: a scene that needs many members gets them all: the central characters named first, the rest
-        # added with --group, within the automatic limit (the pairs fall to names, people to cameo if need be).
+        # added with --group, within the automatic limit (the pairs fall to names, people to cameo if need be; within
+        # 300,000 (2026-10-09b) everyone of the 81 is at least brief, and the two named first are ace).
         code, out, err = run([WRAPPER, "story", "宝鐘マリン", "兎田ぺこら", "--group", "JP", "--topic", "運動会",
                               "--format", "json"], self.cache_dir)
         self.assertEqual(code, 0, err)
@@ -238,14 +239,17 @@ class WrapperTests(unittest.TestCase):
         self.assertEqual(len(pack["people"]), 44)
         self.assertEqual([person["name"] for person in pack["people"]][:3], ["宝鐘マリン", "兎田ぺこら", "ときのそら"])
         self.assertEqual((pack["pair_detail"], pack["pairs"], len(pack["names"])), ("names", [], 44))
-        self.assertLessEqual(pack["characters"], 200000)
+        self.assertLessEqual(pack["characters"], 300000)
+        self.assertEqual([person["detail"] for person in pack["people"][:2]], ["ace", "ace"])
         self.assertEqual(pack["cast"]["groups"], [{"name": "JP", "added": 42}])
         code, view, err = run([WRAPPER, "story", "--group", "all", "--include-former", "--level"], self.cache_dir)
         self.assertEqual((code, err), (0, ""))
         lines = view.replace("\r\n", "\n").splitlines()
         self.assertIn("組み合わせ（3240組）: names", lines)
         self.assertEqual(len([line for line in lines if line.startswith("- ")]), 81)
-        self.assertTrue(any(line.endswith(": cameo") for line in lines))
+        self.assertFalse(any(line.endswith(": cameo") for line in lines))
+        self.assertIn("字数: Markdown", lines[-2])
+        self.assertIn("／上限 300,000字（自動）。--part で全21部", lines[-2])
         code, out, err = run([WRAPPER, "story", "--group", "存在しない"], self.cache_dir)
         self.assertEqual((code, out), (1, ""))
         self.assertIn("使える名前: JP・EN・ID・all", err)
@@ -282,7 +286,7 @@ class WrapperTests(unittest.TestCase):
         pack = json.loads(out)
         self.assertEqual(sorted(person["name"] for person in pack["people"]), sorted(listed))
         self.assertEqual([person["name"] for person in pack["people"]][:2], ["宝鐘マリン", "兎田ぺこら"])
-        self.assertLessEqual(pack["characters"], 200000)
+        self.assertLessEqual(pack["characters"], 300000)
         guide = (SKILL / "references" / "story.md").read_text(encoding="utf-8")
         self.assertIn("会話で示したもののほか、利用者の設定（個人設定・カスタム指示など）にあるものも含む。", guide)
         self.assertIn("推し・好きなタレント・呼び方のメモなど、別の目的で名前を挙げたものは名簿ではない", guide)
@@ -305,7 +309,7 @@ class WrapperTests(unittest.TestCase):
         own = [{key: count for key, count in person["omitted"].items() if key != "topic"}     # topic lines: 30 each
                for person in automatic["people"]]
         self.assertEqual(own, [{}, {}, {}])
-        self.assertEqual(automatic["budget"], {"limit": 100000, "measured_as": "md", "automatic": True})
+        self.assertEqual(automatic["budget"], {"limit": 150000, "measured_as": "md", "automatic": True})
         self.assertEqual(automatic["topics"], ["マネージャー", "専属", "推し", "仲良し", "オカン"])
         self.assertEqual(len(automatic["topic_notes"]), 1)
         self.assertIn("推し: あくたん、ねねち、るしあ先輩", json.dumps(automatic["people"][0]["sections"]["topic"],
