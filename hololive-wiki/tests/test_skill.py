@@ -256,11 +256,12 @@ class WrapperTests(unittest.TestCase):
         self.assertIn("story '宝鐘マリン' '兎田ぺこら' --group JP --topic '運動会'", guide)
         self.assertIn("--group JP", (SKILL / "SKILL.md").read_text(encoding="utf-8"))
 
-    def test_a_scene_follows_a_talent_list_in_the_users_settings(self):
-        # 2026-10-09: a talent list in the user's settings sets the cast like one given in the conversation, whatever
-        # the wiki top says about who is current. The guide's way to match it: the group with --include-former, then
-        # --exclude for everyone not on the list, checked with --level first. The list here is the JP45 people (those
-        # with a digest): 0期生 to FLOW GLOW, five of them listed by the wiki top as graduated or ended, and none of
+    def test_a_scene_follows_the_talent_roster_in_the_users_settings(self):
+        # 2026-10-09: a roster of the talents in the user's settings (a list of everyone, such as one per generation,
+        # not favourites or naming notes) sets the cast like one given in the conversation, whatever the wiki top says
+        # about who is current. The guide's way to match it: the group with --include-former, then --exclude for
+        # everyone not on the roster, checked with --level first. The roster here is the JP45 people (those with a
+        # digest): 0期生 to FLOW GLOW, five of them listed by the wiki top as graduated or ended, and none of
         # アソビ★まわり隊！.
         listed = ("ときのそら ロボ子さん AZKi さくらみこ 星街すいせい アキ・ローゼンタール 赤井はあと 夜空メル 白上フブキ 夏色まつり "
                   "百鬼あやめ 癒月ちょこ 大空スバル 湊あくあ 紫咲シオン 大神ミオ 猫又おかゆ 戌神ころね 兎田ぺこら 不知火フレア 白銀ノエル "
@@ -283,10 +284,13 @@ class WrapperTests(unittest.TestCase):
         self.assertEqual([person["name"] for person in pack["people"]][:2], ["宝鐘マリン", "兎田ぺこら"])
         self.assertLessEqual(pack["characters"], 200000)
         guide = (SKILL / "references" / "story.md").read_text(encoding="utf-8")
-        self.assertIn("利用者の設定（個人設定・カスタム指示など）にあるホロライブのタレント一覧も含む", guide)
-        self.assertIn("wikiトップの在籍・卒業の区分を理由に、一覧の人を外したり、一覧にない人を足したりしない。", guide)
-        self.assertIn("--group JP --include-former --exclude '一覧にない人1'", guide)
-        self.assertIn("利用者の設定（個人設定など）にタレントの一覧があれば", (SKILL / "SKILL.md").read_text(encoding="utf-8"))
+        self.assertIn("会話で示したもののほか、利用者の設定（個人設定・カスタム指示など）にあるものも含む。", guide)
+        self.assertIn("推し・好きなタレント・呼び方のメモなど、別の目的で名前を挙げたものは名簿ではない", guide)
+        self.assertIn("wikiトップの在籍・卒業の区分を理由に、名簿の人を外したり、名簿にない人を足したりしない。", guide)
+        self.assertIn("--group JP --include-former --exclude '名簿にない人1'", guide)
+        skill = (SKILL / "SKILL.md").read_text(encoding="utf-8")
+        self.assertIn("利用者の設定（個人設定など）にタレントの名簿", skill)
+        self.assertIn("推しや呼び方のメモは名簿ではない", skill)
 
     def test_story_detail_is_automatic_unless_capped_and_topics_are_words(self):
         # From the 220,000 variant tried in another chat (2026-10-06): its three people and topics. The topics were
