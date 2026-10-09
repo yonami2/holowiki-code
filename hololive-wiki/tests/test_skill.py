@@ -206,11 +206,11 @@ class WrapperTests(unittest.TestCase):
         self.assertTrue(report["archive_sha256_ok"])
         self.assertEqual(report["candidates"][0]["complete"], True)
 
-    def test_story_takes_up_to_fifteen_people(self):
-        # references/story.md allows 15 people in one story (5 until 2026-10-04). These 15 give the longest pack of
-        # any 15 (a greedy search over all pairs on 2026-10-04). Since 2026-10-06 the automatic limit is 80,000
-        # characters for one person and 10,000 for each other one, at most 200,000, and the detail level is
-        # chosen automatically: each person's section stays above the pairs' mention candidates.
+    def test_story_takes_fifteen_people_as_before(self):
+        # These 15 give the longest pack of any 15 (a greedy search over all pairs on 2026-10-04); 15 was the most
+        # one story took until 2026-10-08. Since 2026-10-06 the automatic limit is 80,000 characters for one person
+        # and 10,000 for each other one, at most 200,000, and the detail level is chosen automatically: each
+        # person's section stays above the pairs' mention candidates.
         names = ["不知火フレア", "桃鈴ねね", "雪花ラミィ", "宝鐘マリン", "博衣こより", "さくらみこ", "大空スバル", "星街すいせい",
                  "兎田ぺこら", "戌神ころね", "アキ・ローゼンタール", "白銀ノエル", "夏色まつり", "大神ミオ", "白上フブキ"]
         code, out, err = run([WRAPPER, "story", *names, "--format", "json"], self.cache_dir)
@@ -222,10 +222,39 @@ class WrapperTests(unittest.TestCase):
         self.assertLessEqual(pack["characters"], pack["budget"]["limit"])
         self.assertEqual((pack["detail"], pack["pair_detail"]), ("normal", "brief"))
         guide = (SKILL / "references" / "story.md").read_text(encoding="utf-8")
-        self.assertIn("1回の `story` に入れるのは15人までとする。", guide)
+        self.assertIn("人数に上限はなく、場面の顔ぶれ全員を1回の `story` に入れる（組を分けて実行しない）。", guide)
+        self.assertNotIn("15人までとする", guide)
         self.assertIn("最大200,000字で、13人以上は200,000字", guide)
         self.assertNotIn("5人を超える場合", guide)
         self.assertNotIn("--detail brief", guide)
+
+    def test_a_scene_with_many_members(self):
+        # 2026-10-09: a scene that needs many members gets them all: the central characters named first, the rest
+        # added with --group, within the automatic limit (the pairs fall to names, people to cameo if need be).
+        code, out, err = run([WRAPPER, "story", "宝鐘マリン", "兎田ぺこら", "--group", "JP", "--topic", "運動会",
+                              "--format", "json"], self.cache_dir)
+        self.assertEqual(code, 0, err)
+        pack = json.loads(out)
+        self.assertEqual(len(pack["people"]), 44)
+        self.assertEqual([person["name"] for person in pack["people"]][:3], ["宝鐘マリン", "兎田ぺこら", "ときのそら"])
+        self.assertEqual((pack["pair_detail"], pack["pairs"], len(pack["names"])), ("names", [], 44))
+        self.assertLessEqual(pack["characters"], 200000)
+        self.assertEqual(pack["cast"]["groups"], [{"name": "JP", "added": 42}])
+        code, view, err = run([WRAPPER, "story", "--group", "all", "--include-former", "--level"], self.cache_dir)
+        self.assertEqual((code, err), (0, ""))
+        lines = view.replace("\r\n", "\n").splitlines()
+        self.assertIn("組み合わせ（3240組）: names", lines)
+        self.assertEqual(len([line for line in lines if line.startswith("- ")]), 81)
+        self.assertTrue(any(line.endswith(": cameo") for line in lines))
+        code, out, err = run([WRAPPER, "story", "--group", "存在しない"], self.cache_dir)
+        self.assertEqual((code, out), (1, ""))
+        self.assertIn("使える名前: JP・EN・ID・all", err)
+        guide = (SKILL / "references" / "story.md").read_text(encoding="utf-8")
+        self.assertIn("## 2. 顔ぶれを決める", guide)
+        self.assertIn("利用者に人数や顔ぶれを尋ねない", guide)
+        self.assertIn("1人あたりの資料が短くなることを理由に人数を減らさない", guide)
+        self.assertIn("story '宝鐘マリン' '兎田ぺこら' --group JP --topic '運動会'", guide)
+        self.assertIn("--group JP", (SKILL / "SKILL.md").read_text(encoding="utf-8"))
 
     def test_story_detail_is_automatic_unless_capped_and_topics_are_words(self):
         # From the 220,000 variant tried in another chat (2026-10-06): its three people and topics. The topics were

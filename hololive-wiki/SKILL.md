@@ -22,7 +22,7 @@ description: >-
 | 場面 | 読む資料・使うもの |
 | --- | --- |
 | 発動後、人物の調査・描写・関係性・反応分析を行う | [人物調査](references/persona-research.md)。対象範囲、出典の解釈、呼称の向きを確認する。 |
-| 物語・台詞・掛け合い・反応の創作（架空の場面） | [物語の作り方](references/story.md)。`story` の資料パックを読み、物語用の読了範囲と出力規則に従う。 |
+| 物語・台詞・掛け合い・反応の創作（架空の場面） | [物語の作り方](references/story.md)。場面に居合わせる顔ぶれを自動で決め（大勢が自然な場面は人数を減らさず全員）、`story` の資料パックを読み、物語用の読了範囲と出力規則に従う。 |
 | JP・EN・IDの対象者がキャッシュにいる、または再登場した | [人物別キャッシュ](#人物別キャッシュ)で名前からカードと出典の入口を引く。全文読了と最新性は別に確認する。 |
 | Seesaaの元リンクを保って読む必要がある | [リーダー操作](references/reader.md)の使い方と該当オプション。[専用スクリプト](scripts/hololive_wiki_reader.py)を実行する。広告判定用の隣接モジュールも同梱する。このwikiは絵文字などをUTF-16の数値文字参照の組で記録しているため、`--surrogate-charrefs utf16` を付ける（付けないと「�」になる）。 |
 | 文字化け、広告判定、警告、表の展開失敗、索引・キャッシュの問題がある | リーダー操作の該当する診断節と、[キャッシュ案内](cache/hololive_wiki_cache_v3.md)の「困ったとき」を読む。通常の調査で診断全節やPython全文を毎回読み込まない。 |
@@ -34,6 +34,7 @@ v3キャッシュを[アーカイブ](cache/hololive_wiki_person_cache.tar.xz)�
 
 ```bash
 python3 scripts/hololive_cache.py story '宝鐘マリン' '兎田ぺこら' --topic '料理'   # 物語用の資料パック
+python3 scripts/hololive_cache.py story '宝鐘マリン' '兎田ぺこら' --group JP --topic '運動会'   # 大人数の場面
 python3 scripts/hololive_cache.py show '紫咲シオン'
 python3 scripts/hololive_cache.py scene '宝鐘マリン' '兎田ぺこら'
 python3 scripts/hololive_cache.py pages '宝鐘マリン'
@@ -41,7 +42,7 @@ python3 scripts/hololive_cache.py read '宝鐘マリン' '語録' --find '口癖
 python3 scripts/hololive_cache.py status '天音かなた'                              # wikiトップの掲載欄
 ```
 
-`story` には通常 `--detail`・`--budget` を付けない（詳細度は人数別の上限の中で自動で決まり、利用者に調整を求めない）。話題は `--topic` を語ごとに繰り返す。15,000字を超える出力は `--part 1`、`--part 2`…で末尾の部まで読む。詳細度の判定（ace・full・normal・brief）だけを確かめるときは、同じコマンドに `--level` を付ける（確認用。資料パックの本文は出ない）。JP45名の長いダイジェストは `show 名前 --digest --section 語` で必要な節だけ読む。手順は[物語の作り方](references/story.md)に従う。
+`story` には通常 `--detail`・`--budget` を付けない（詳細度は人数別の上限の中で自動で決まり、利用者に調整を求めない）。話題は `--topic` を語ごとに繰り返す。運動会・ライブ・忘年会など大勢が居合わせる場面は、利用者に尋ねずに顔ぶれを決め、中心人物を先に名前で挙げて残りを `--group`（JP・EN・ID・all・期・ユニット）で加える。資料が短くなることを理由に人数を減らさない（人数に上限はなく、大人数では各人 cameo・組み合わせ names の段階で上限に収まる。卒業・活動終了の人は会話の前提に応じて `--include-former`）。15,000字を超える出力は `--part 1`、`--part 2`…で末尾の部まで読む。詳細度の判定（ace・full・normal・brief・cameo）だけを確かめるときは、同じコマンドに `--level` を付ける（確認用。資料パックの本文は出ない）。JP45名の長いダイジェストは `show 名前 --digest --section 語` で必要な節だけ読む。手順は[物語の作り方](references/story.md)に従う。
 
 名前は、正式名・別名・読み（各人の個別ページのプロフィール表の名前欄とwikiトップの表から。宝鐘マリン・大神ミオはwikiに読みがない）・Xアカウント（`@`の有無、大文字小文字を問わない）と、wikiの呼称表で1人だけを指す呼び名（フブちゃん、ししろん等）で引ける。ひらがな・カタカナ・全角・半角・空白の違いは区別しない。複数人に当てはまる語は候補を示して止まるので、正式名で指定し直す。`scene` は複数人のカードと相互の呼称、`nicknames 名前 --reverse` は他者の表からの逆引き、`sources 名前` は取得元を示す。詳細は[キャッシュ案内](cache/hololive_wiki_cache_v3.md)を必要なときに読む。
 
