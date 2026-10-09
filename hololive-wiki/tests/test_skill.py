@@ -778,6 +778,44 @@ class RepairTests(unittest.TestCase):
                 wrapper._tidy(str(base), wrapper.FOLDER)
             self.assertEqual(list(base.iterdir()), [])
 
+    def test_a_lock_folder_held_by_an_installer_is_left(self):
+        # An installer of that version holds the lock (its version folder is not there yet): removing the
+        # folder would let a second installer lock a new file and unpack alongside it.
+        with tempfile.TemporaryDirectory() as td:
+            base = Path(td)
+            lock_folder = base / (wrapper.OWN + "0" * 16 + ".lock")
+            private_folder(lock_folder)
+            private_file(lock_folder / "install.lock", b"")
+            descriptor = os.open(lock_folder / "install.lock", os.O_RDWR)
+            try:
+                release = wrapper._lock(descriptor)
+                wrapper._tidy(str(base), wrapper.FOLDER)
+                self.assertTrue((lock_folder / "install.lock").is_file())
+                release()
+            finally:
+                os.close(descriptor)
+            wrapper._tidy(str(base), wrapper.FOLDER)                    # the next unpacking, once released
+            self.assertEqual(list(base.iterdir()), [])
+
+    @unittest.skipUnless(os.name == "posix", "Windows does not remove a file another process has open")
+    def test_an_installer_takes_the_lock_again_when_its_file_was_removed(self):
+        # Another version's unpacking removed the lock folder after this installer opened the file: the lock
+        # it then gets is on a removed file, so it takes the one at the path.
+        with tempfile.TemporaryDirectory() as td:
+            dest = Path(td) / (wrapper.OWN + "0" * 16)
+            lock_file = dest.with_name(dest.name + ".lock") / "install.lock"
+            real_lock, calls = wrapper._lock, []
+
+            def removed_meanwhile(descriptor):
+                if not calls:
+                    shutil.rmtree(lock_file.parent)
+                calls.append(descriptor)
+                return real_lock(descriptor)
+            with mock.patch.object(wrapper, "_lock", side_effect=removed_meanwhile):
+                with wrapper._InstallationLock(dest) as held:
+                    self.assertTrue(wrapper._same_file(held.descriptor, lock_file))
+            self.assertEqual(len(calls), 2)
+
     @unittest.skipUnless(os.name == "posix", "umask is POSIX")
     def test_permissive_umask_does_not_make_reused_code_writable(self):
         with tempfile.TemporaryDirectory() as td:
