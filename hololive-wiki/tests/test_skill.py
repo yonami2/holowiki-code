@@ -256,6 +256,38 @@ class WrapperTests(unittest.TestCase):
         self.assertIn("story '宝鐘マリン' '兎田ぺこら' --group JP --topic '運動会'", guide)
         self.assertIn("--group JP", (SKILL / "SKILL.md").read_text(encoding="utf-8"))
 
+    def test_a_scene_follows_a_talent_list_in_the_users_settings(self):
+        # 2026-10-09: a talent list in the user's settings sets the cast like one given in the conversation, whatever
+        # the wiki top says about who is current. The guide's way to match it: the group with --include-former, then
+        # --exclude for everyone not on the list, checked with --level first. The list here is the JP45 people (those
+        # with a digest): 0期生 to FLOW GLOW, five of them listed by the wiki top as graduated or ended, and none of
+        # アソビ★まわり隊！.
+        listed = ("ときのそら ロボ子さん AZKi さくらみこ 星街すいせい アキ・ローゼンタール 赤井はあと 夜空メル 白上フブキ 夏色まつり "
+                  "百鬼あやめ 癒月ちょこ 大空スバル 湊あくあ 紫咲シオン 大神ミオ 猫又おかゆ 戌神ころね 兎田ぺこら 不知火フレア 白銀ノエル "
+                  "宝鐘マリン 天音かなた 角巻わため 常闇トワ 姫森ルーナ 雪花ラミィ 桃鈴ねね 獅白ぼたん 尾丸ポルカ ラプラス・ダークネス 鷹嶺ルイ "
+                  "博衣こより 沙花叉クロヱ 風真いろは 火威青 音乃瀬奏 一条莉々華 儒烏風亭らでん 轟はじめ 響咲リオナ 虎金妃笑虎 水宮枢 輪堂千速 "
+                  "綺々羅々ヴィヴィ").split()
+        command = [WRAPPER, "story", "宝鐘マリン", "兎田ぺこら", "--group", "JP", "--include-former"]
+        code, view, err = run(command + ["--level"], self.cache_dir)
+        self.assertEqual((code, err), (0, ""))
+        cast = [line[2:].rsplit(": ", 1)[0] for line in view.replace("\r\n", "\n").splitlines() if line.startswith("- ")]
+        self.assertTrue(set(listed) <= set(cast))
+        others = [name for name in cast if name not in listed]
+        self.assertEqual(sorted(others), sorted(["潤羽るしあ", "桐生ココ", "魔乃アロエ", "宙科そぴあ", "熱千めら", "百灯キョーコ",
+                                                 "鈴鳴つづり"]))
+        excludes = [part for name in others for part in ("--exclude", name)]
+        code, out, err = run(command + excludes + ["--topic", "運動会", "--format", "json"], self.cache_dir)
+        self.assertEqual(code, 0, err)
+        pack = json.loads(out)
+        self.assertEqual(sorted(person["name"] for person in pack["people"]), sorted(listed))
+        self.assertEqual([person["name"] for person in pack["people"]][:2], ["宝鐘マリン", "兎田ぺこら"])
+        self.assertLessEqual(pack["characters"], 200000)
+        guide = (SKILL / "references" / "story.md").read_text(encoding="utf-8")
+        self.assertIn("利用者の設定（個人設定・カスタム指示など）にあるホロライブのタレント一覧も含む", guide)
+        self.assertIn("wikiトップの在籍・卒業の区分を理由に、一覧の人を外したり、一覧にない人を足したりしない。", guide)
+        self.assertIn("--group JP --include-former --exclude '一覧にない人1'", guide)
+        self.assertIn("利用者の設定（個人設定など）にタレントの一覧があれば", (SKILL / "SKILL.md").read_text(encoding="utf-8"))
+
     def test_story_detail_is_automatic_unless_capped_and_topics_are_words(self):
         # From the 220,000 variant tried in another chat (2026-10-06): its three people and topics. The topics were
         # given there as one spaced string first, which found nothing; they are now searched word by word. Three
