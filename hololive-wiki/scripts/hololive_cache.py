@@ -23,7 +23,8 @@ Each version of the archive has its own folder (hololive-wiki-v3-<user>-<first
 after an update, or --repair), the folders of this user's other versions in the
 same location are removed with their lock folders: each is renamed aside first,
 so a command of that version still running finds no copy, rather than a
-half-deleted one, and unpacks its own again. A folder Windows will not release
+half-deleted one, and unpacks its own again. A lock folder stays while an
+installer of its version holds the lock in it. A folder Windows will not release
 (a file held open) is removed at the next unpacking. Staging folders abandoned
 for a day are removed as well. --status lists the other versions present.
 
@@ -61,10 +62,10 @@ import sys
 
 ARCHIVE = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))),
                        "cache", "hololive_wiki_person_cache.tar.xz")
-ARCHIVE_SHA256 = "fd4fee0b87bfdbdbc7fa02929c2670b2c69a1590a5205b04830b6ec95e305c8c"
+ARCHIVE_SHA256 = "4197935471c1ec6da93790e1e4a499d2ddd3a5769a8cf6788c347b5119854aba"
 # The unpacked MANIFEST.sha256 of this archive: files are checked against it, not against anything
 # stored beside them.
-MANIFEST_SHA256 = "cf8b297ae5c6bfbe41d2d5c47be3c439cf505f48a01af6fa342d0a805cf237d6"
+MANIFEST_SHA256 = "4691e0a95d276ad0c1fc6a1583d9a8265e548f1f3db901157bd5507f98e75481"
 ROOT_NAME = "hololive_wiki_person_cache"
 PREFIX = "hololive-wiki-v3-"
 OVERRIDE = "HOLOLIVE_WIKI_CACHE_DIR"
@@ -550,7 +551,7 @@ def _tidy(base, keep):
                     pass                              # held open on Windows: tried again at the next unpacking
                 _remove_tree(aside)
             elif not os.path.lexists(entry.path[:-len(".lock")]):
-                _remove_tree(entry.path)              # only once its version is gone
+                _remove_lock_folder(entry.path)       # only once its version is gone, and not while held
             continue
         try:
             old = now - entry.stat(follow_symlinks=False).st_mtime > 24 * 3600
@@ -558,6 +559,61 @@ def _tidy(base, keep):
             continue
         if old and name.startswith((PREFIX + "staging-", PREFIX + "stale-")):
             _remove_tree(entry.path)
+
+
+def _remove_lock_folder(folder):
+    """Remove another version's lock folder unless an installer of that version holds its lock (the folder then
+    stays for a later unpacking). On POSIX the file is removed while this process holds the lock: an installer
+    that opened it before then gets the lock on a removed file, notices, and takes the one at the path
+    (_InstallationLock). Windows does not remove a file that another process has open."""
+    path = os.path.join(folder, "install.lock")
+    try:
+        descriptor = os.open(path, os.O_RDWR | getattr(os, "O_NOFOLLOW", 0))
+    except FileNotFoundError:
+        _remove_tree(folder)
+        return
+    except OSError:
+        return
+    try:
+        release = _try_lock(descriptor)
+        if release is None:
+            return                                    # an installer of that version is at work
+        try:
+            if POSIX:
+                _remove_tree(folder)
+        finally:
+            release()
+    finally:
+        os.close(descriptor)
+    if not POSIX:
+        _remove_tree(folder)
+
+
+def _try_lock(descriptor):
+    """The exclusive lock on the file if no process holds it, else None; never waits. Returns the release
+    function."""
+    try:
+        if os.name != "nt":
+            import fcntl
+            fcntl.flock(descriptor, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            return lambda: fcntl.flock(descriptor, fcntl.LOCK_UN)
+        import msvcrt
+        msvcrt.locking(descriptor, msvcrt.LK_NBLCK, 1)    # the byte the installers lock (see _lock)
+    except OSError:
+        return None
+
+    def release():
+        os.lseek(descriptor, 0, os.SEEK_SET)
+        msvcrt.locking(descriptor, msvcrt.LK_UNLCK, 1)
+    return release
+
+
+def _same_file(descriptor, path):
+    try:
+        held, current = os.fstat(descriptor), os.stat(path, follow_symlinks=False)
+    except OSError:
+        return False
+    return (held.st_dev, held.st_ino) == (current.st_dev, current.st_ino)
 
 
 def _lock(descriptor):
@@ -616,23 +672,36 @@ class _InstallationLock:
         self.folder = dest.with_name(dest.name + ".lock")
 
     def __enter__(self):
-        try:
-            os.mkdir(self.folder, 0o700)
-            if POSIX:
-                os.chmod(self.folder, 0o700)
-        except FileExistsError:
-            pass
-        if not _private(self.folder):
-            raise ValueError(f"{self.folder}: unsafe cache lock folder")
-        path = self.folder / "install.lock"
-        self.descriptor = os.open(path, os.O_CREAT | os.O_RDWR | getattr(os, "O_NOFOLLOW", 0), 0o600)
-        try:
-            _file_info(path)
-            self.release = _lock(self.descriptor)
-        except BaseException:
+        # Another version's unpacking may remove this folder meanwhile (_remove_lock_folder): a lock taken on a
+        # removed file guards nothing, so the lock is taken again on the file at the path.
+        for _ in range(10):
+            try:
+                os.mkdir(self.folder, 0o700)
+                if POSIX:
+                    os.chmod(self.folder, 0o700)
+            except FileExistsError:
+                pass
+            if not _private(self.folder):
+                raise ValueError(f"{self.folder}: unsafe cache lock folder")
+            path = self.folder / "install.lock"
+            try:
+                self.descriptor = os.open(path, os.O_CREAT | os.O_RDWR | getattr(os, "O_NOFOLLOW", 0), 0o600)
+            except FileNotFoundError:
+                continue                                  # the folder went between mkdir and open
+            try:
+                _file_info(path)
+                self.release = _lock(self.descriptor)
+            except FileNotFoundError:
+                os.close(self.descriptor)
+                continue
+            except BaseException:
+                os.close(self.descriptor)
+                raise
+            if not POSIX or _same_file(self.descriptor, path):
+                return self
+            self.release()
             os.close(self.descriptor)
-            raise
-        return self
+        raise ValueError(f"{self.folder}: the cache lock folder kept being removed; run the command again")
 
     def __exit__(self, *exc_info):
         try:
